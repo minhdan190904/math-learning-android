@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <!-- KaTeX core -->
+    <link rel="stylesheet" href="katex/katex.min.css">
+    <script src="katex/katex.min.js"></script>
+
+    <!-- Auto-render để render inline: \( ... \) và display: $$ ... $$ -->
+    <script src="katex/contrib/auto-render.min.js"></script>
+
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          background: white;
+          color: black;
+          font-size: 16px;
+          -webkit-text-size-adjust: 100%;
+        }
+        #c {
+          padding: 12px;
+          word-break: break-word;
+        }
+    </style>
+
+    <script>
+        // Render một công thức đơn (chuỗi tex), có thể chọn displayMode
+        function renderLatex(tex, display) {
+          const el = document.getElementById('c');
+          el.innerHTML = '';
+          try {
+            katex.render(tex, el, { throwOnError: false, displayMode: !!display });
+          } catch (e) {
+            el.textContent = 'Render error: ' + e.message;
+          }
+        }
+
+        // Render cả câu có chữ + công thức (inline \( ... \) hoặc $$ ... $$)
+        function renderInlineText(rawHtml) {
+          const el = document.getElementById('c');
+          el.innerHTML = rawHtml; // rawHtml có delimiters \( \) / $$
+          try {
+            renderMathInElement(el, {
+              delimiters: [
+                {left: "\\(", right: "\\)", display: false},
+                {left: "$$", right: "$$", display: true}
+              ],
+              throwOnError: false
+            });
+          } catch (e) {
+            el.textContent = 'Render error: ' + e.message;
+          }
+        }
+    </script>
+</head>
+<body>
+<div id="c"></div>
+</body>
+</html>

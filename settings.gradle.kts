@@ -1,4 +1,11 @@
 pluginManagement {
+    plugins {
+        id("org.jetbrains.kotlin.android") version "2.2.10"
+        id("org.jetbrains.kotlin.plugin.compose") version "2.2.10"
+        id("com.android.application") version "8.12.0"
+        id("com.google.devtools.ksp") version "2.2.10-2.0.2"
+        id("com.google.dagger.hilt.android") version "2.57"
+    }
     repositories {
         google {
             content {
@@ -7,6 +14,7 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -21,4 +29,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "MathLearning"
 include(":app")
- 

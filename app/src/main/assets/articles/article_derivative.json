@@ -1,0 +1,32 @@
+{
+  "id": "derivative_intro",
+  "title": "Giới thiệu đạo hàm",
+  "blocks": [
+    { "type": "section",   "text": "1. Khái niệm cơ bản" },
+    { "type": "text",    "text": "Đạo hàm mô tả tốc độ thay đổi tức thời của hàm số. Ví dụ, **vận tốc** là đạo hàm của quãng đường theo thời gian." },
+    { "type": "text_katex", "raw": "Ví dụ: Với hàm \\( f(x) = x^2 \\), ta có \\( f'(x) = 2x \\)." },
+
+    { "type": "section", "text": "2. Công thức cơ bản" },
+    { "type": "math",    "tex": "\\frac{d}{dx} x^n = n x^{n-1}", "display": true },
+    { "type": "math",    "tex": "\\frac{d}{dx} x^4 = 4x^3", "display": true },
+
+    { "type": "section", "text": "3. Ví dụ tích phân" },
+    { "type": "text_katex", "raw": "Ta có $$ \\int_{0}^{1} x^{2} \\, dx = \\frac{1}{3} $$" },
+
+    { "type": "image",  "url": "https://timdiemthi.com/wp-content/uploads/2020/06/c%C3%B4ng-th%E1%BB%A9c-t%C3%ADnh-%C4%91%E1%BA%A1o-h%C3%A0m.jpg", "caption": "Ý nghĩa hình học của đạo hàm" },
+
+    { "type": "section", "text": "4. Kết luận" },
+    { "type": "text",    "text": "Trong thực hành, **đạo hàm** là công cụ cốt lõi của giải tích." },
+    {
+      "type": "grid",
+      "columns": 2,
+      "items": [
+        { "text": "Cột 1 - Hàng 1" },
+        { "text": "Cột 2 - Hàng 2" },
+        { "tex": "x^2 + y^2 = z^2" },
+        { "imageUrl": "https://timdiemthi.com/wp-content/uploads/2020/06/c%C3%B4ng-th%E1%BB%A9c-t%C3%ADnh-%C4%91%E1%BA%A1o-h%C3%A0m.jpg" }
+      ]
+    }
+
+  ]
+}

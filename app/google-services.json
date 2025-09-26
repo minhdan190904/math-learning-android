@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "369785949098",
+    "project_id": "mathlearning-65771",
+    "storage_bucket": "mathlearning-65771.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369785949098:android:571b1f7ee53b185703b9d3",
+        "android_client_info": {
+          "package_name": "com.trilogy.mathlearning"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "369785949098-8mq2hckopna5fojo4vdqpfhcu9tm7otu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trilogy.mathlearning",
+            "certificate_hash": "eecb8bf3707b701a8ffaf8295a05f0d49a85bea6"
+          }
+        },
+        {
+          "client_id": "369785949098-3s13jpuemqjjsf081uhk9rtsg5s4kgtv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBz6bDeuLa8XtJ-CMtExm2nW3euqAfZk0c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "369785949098-3s13jpuemqjjsf081uhk9rtsg5s4kgtv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

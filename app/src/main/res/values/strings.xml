@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">MathLearning</string>
+    <string name="default_web_client_id" translatable="false">369785949098-3s13jpuemqjjsf081uhk9rtsg5s4kgtv.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">369785949098</string>
+    <string name="google_api_key" translatable="false">AIzaSyBz6bDeuLa8XtJ-CMtExm2nW3euqAfZk0c</string>
+    <string name="google_app_id" translatable="false">1:369785949098:android:571b1f7ee53b185703b9d3</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBz6bDeuLa8XtJ-CMtExm2nW3euqAfZk0c</string>
+    <string name="google_storage_bucket" translatable="false">mathlearning-65771.firebasestorage.app</string>
+    <string name="project_id" translatable="false">mathlearning-65771</string>
 </resources>
