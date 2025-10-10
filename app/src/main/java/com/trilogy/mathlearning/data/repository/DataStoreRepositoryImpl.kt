@@ -24,7 +24,6 @@ class DataStoreRepositoryImpl @Inject constructor(
     private object PreferencesKey {
         val onBoardingKey = booleanPreferencesKey("on_boarding_completed")
     }
-
     private val dataStore = context.dataStore
 
     override suspend fun saveOnBoardingState(completed: Boolean) {
