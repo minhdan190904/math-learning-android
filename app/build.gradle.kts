@@ -119,7 +119,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.28.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.28.0")
 
-    // ✅ For ai gemini
+    // For ai gemini
     implementation(platform("com.google.firebase:firebase-bom:34.1.0"))
     implementation("com.google.firebase:firebase-ai")
     implementation("com.google.firebase:firebase-analytics")
@@ -132,7 +132,7 @@ dependencies {
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
-    //Cam
+    // Cam
     val camerax = "1.3.4"
     implementation ("androidx.camera:camera-core:$camerax")
     implementation ("androidx.camera:camera-camera2:$camerax")
@@ -142,7 +142,7 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
 
-    //json
+    // json
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     // Retrofit & OkHttp
@@ -150,4 +150,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:converter-jackson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
+
+    //shared
+    implementation("androidx.preference:preference:1.2.1")
 }

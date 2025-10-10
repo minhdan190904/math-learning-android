@@ -7,7 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import com.trilogy.mathlearning.ui.presentation.auth.login.LoginScreen
+import com.trilogy.mathlearning.ui.presentation.auth.LoginScreen
+import com.trilogy.mathlearning.ui.presentation.auth.RegisterScreen
 import com.trilogy.mathlearning.ui.presentation.bottom_navigation.HomeRoot
 import com.trilogy.mathlearning.ui.presentation.camera.CropEditorScreen
 import com.trilogy.mathlearning.ui.presentation.camera.CroppedPreviewScreen
@@ -34,6 +35,12 @@ fun AppNavigation(startDestination: String) {
 
         composable(Screen.Splash.route){
             SplashScreen()
+        }
+
+
+        //Register
+        composable(Screen.Register.route) {
+            RegisterScreen()
         }
 
         // Login
