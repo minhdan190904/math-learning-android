@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.trilogy.mathlearning.ui.presentation.navigation.AppNavigation
+import com.trilogy.mathlearning.ui.presentation.navigation.Screen
 import com.trilogy.mathlearning.ui.presentation.splash.SplashViewModel
 import com.trilogy.mathlearning.ui.theme.MathLearningTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,28 +30,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MathLearningTheme(darkTheme = false) {
                 val screen by splashViewModel.startDestination
-                AppNavigation(startDestination = screen)
+                AppNavigation(startDestination = Screen.HomeRoot.route)
             }
         }
     }
 }
-
-//@Composable
-//fun TestFirebaseAI(){
-//    val context = LocalContext.current
-//    val solver = GenerateSolutionSteps(context)
-//    var steps by remember { mutableStateOf<List<String>>(emptyList()) }
-//
-//    LaunchedEffect(Unit) {
-//        steps = solver.generateSteps(R.drawable.img)
-//        Log.i("MathLearning", "Generated steps: $steps")
-//    }
-//
-//    LazyColumn {
-//        items(steps.size) { index ->
-//            MathInlineSentence(
-//                raw = "• " + steps[index]
-//            )
-//        }
-//    }
-//}
