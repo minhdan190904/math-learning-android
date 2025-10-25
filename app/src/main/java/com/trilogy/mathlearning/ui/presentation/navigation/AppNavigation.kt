@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.trilogy.mathlearning.ui.presentation.auth.ActivateScreen
 import com.trilogy.mathlearning.ui.presentation.auth.LoginScreen
 import com.trilogy.mathlearning.ui.presentation.auth.RegisterScreen
 import com.trilogy.mathlearning.ui.presentation.bottom_navigation.HomeRoot
@@ -40,13 +41,37 @@ fun AppNavigation(startDestination: String) {
 
         //Register
         composable(Screen.Register.route) {
-            RegisterScreen()
+            RegisterScreen(
+                onGoActivate = {
+                    navController.navigate(Screen.Activate.route + "/$it")
+                },
+                onSignInClick = {
+                    navController.navigate(Screen.Login.route)
+                }
+            )
+        }
+
+        //activate
+        composable(Screen.Activate.route + "/{email}") {
+            val email = it.arguments?.getString("email")
+            ActivateScreen(
+                email = email ?: "",
+                onBack = {
+                    navController.popBackStack()
+                },
+                onActivated = {
+                    navController.navigate(Screen.Login.route)
+                }
+            )
         }
 
         // Login
         composable(Screen.Login.route) {
             LoginScreen(
-                onLoginSuccess = { navController.navigate(Screen.HomeRoot.route) }
+                onLoginSuccess = { navController.navigate(Screen.HomeRoot.route) },
+                onSignUpClick = {
+                    navController.navigate(Screen.Register.route)
+                }
             )
         }
 

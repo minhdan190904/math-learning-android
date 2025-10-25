@@ -12,4 +12,7 @@ sealed class Screen(val route: String) {
     data object Splash : Screen(route = "splash_screen")
     data object HomeRoot : Screen(route = "home_root_screen")
     data object TakeMathImage: Screen("take_math_image_screen")
+    data object Practice: Screen("practice_screen")
+    data object Community: Screen("community_screen")
+    data object Profile: Screen("profile_screen")
 }

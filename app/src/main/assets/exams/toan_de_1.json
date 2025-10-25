@@ -1,0 +1,31 @@
+{
+  "id": "toan_de_1",
+  "title": "Đề kiểm tra Toán 12 - Hàm số & Đạo hàm",
+  "durationMin": 15,
+  "questions": [
+    {
+      "id": "q1",
+      "index": 1,
+      "content": "Cho hàm số \\(f(x)=x^2+3x-4\\). Giá trị của \\(f'(2)\\) là:",
+      "choices": [
+        { "label": "A", "text": "3" },
+        { "label": "B", "text": "7" },
+        { "label": "C", "text": "x=2" },
+        { "label": "D", "text": "Không xác định" }
+      ],
+      "answer": "B"
+    },
+    {
+      "id": "q2",
+      "index": 2,
+      "content": "Tính đạo hàm của \\( y = \\sin x \\cdot e^{2x} \\)",
+      "choices": [
+        { "label": "A", "text": "\\(y' = e^{2x}(\\cos x + 2\\sin x)\\)" },
+        { "label": "B", "text": "\\(y' = e^{2x}(\\cos x - 2\\sin x)\\)" },
+        { "label": "C", "text": "\\(y' = 2e^{2x}\\sin x\\)" },
+        { "label": "D", "text": "\\(y' = e^{2x}\\cos x\\)" }
+      ],
+      "answer": "A"
+    }
+  ]
+}
