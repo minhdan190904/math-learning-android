@@ -1,11 +1,14 @@
 package com.trilogy.mathlearning.ui.presentation.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trilogy.mathlearning.data.repository.AuthRepository
+import com.trilogy.mathlearning.data.repository.UserRepository
 import com.trilogy.mathlearning.domain.model.*
 import com.trilogy.mathlearning.utils.NetworkResource
 import com.trilogy.mathlearning.utils.UiState
+import com.trilogy.mathlearning.utils.myUser
 import com.trilogy.mathlearning.utils.tokenApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,10 +19,14 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<UiState<Any>>(UiState.Empty)
     val authState: StateFlow<UiState<Any>> = _authState
+
+    private val _userInfo = MutableStateFlow<UserResDto?>(null)
+    val userInfo: StateFlow<UserResDto?> = _userInfo
 
     private val _registerInfo = MutableStateFlow<LoginDto?>(null)
     val registerInfo: StateFlow<LoginDto?> = _registerInfo
@@ -30,6 +37,8 @@ class AuthViewModel @Inject constructor(
             when (val res = authRepository.login(LoginDto(email = email, password = password))) {
                 is NetworkResource.Success -> {
                     tokenApi = res.data.accessToken
+                    Log.i("DanMinh123", tokenApi!!)
+                    getUser()
                     _authState.value = UiState.Success(res.data)
                 }
                 is NetworkResource.NetworkException -> _authState.value = UiState.Failure(res.message)
@@ -68,5 +77,21 @@ class AuthViewModel @Inject constructor(
 
     fun clearAuthState() {
         _authState.value = UiState.Empty
+    }
+
+    fun getUser(){
+        viewModelScope.launch {
+            when(val res = userRepository.getUser()){
+                is NetworkResource.Success -> {
+                    _userInfo.value = res.data
+                    myUser = res.data
+                    Log.d("getUser", res.data.toString())
+                }
+                is NetworkResource.NetworkException -> res.message?.let { Log.d("NetworkException", it) }
+
+                is NetworkResource.Error -> res.message?.let { Log.d("Error123", it) }
+            }
+        }
+
     }
 }

@@ -36,7 +36,7 @@ fun SplashScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-//            .background(gradient)
+            .background(gradient)
             .systemBarsPadding()
             .padding(horizontal = 24.dp)
     ) {

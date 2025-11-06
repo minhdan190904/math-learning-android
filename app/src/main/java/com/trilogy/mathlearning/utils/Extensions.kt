@@ -1,5 +1,8 @@
 package com.trilogy.mathlearning.utils
 
+import com.firebase.ui.auth.data.model.User
+import com.trilogy.mathlearning.domain.model.UserDto
+import com.trilogy.mathlearning.domain.model.UserResDto
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -8,6 +11,13 @@ var tokenApi: String?
     set(value) {
         SharedPreferencesReManager.saveData(TOKEN_KEY, value)
     }
+
+var myUser: UserResDto?
+    get() = SharedPreferencesReManager.getData(USER_KEY, UserResDto::class.java)
+    set(value) {
+        SharedPreferencesReManager.saveData(USER_KEY, value)
+    }
+
 
 suspend fun <T> handleNetworkCall(
     call: suspend () -> T,

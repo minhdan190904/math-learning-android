@@ -15,6 +15,7 @@ import com.trilogy.mathlearning.ui.presentation.camera.CropEditorScreen
 import com.trilogy.mathlearning.ui.presentation.camera.CroppedPreviewScreen
 import com.trilogy.mathlearning.ui.presentation.camera.EditorViewModel
 import com.trilogy.mathlearning.ui.presentation.camera.ScanCropScreen
+import com.trilogy.mathlearning.ui.presentation.community.CreateCommunityPostScreen
 import com.trilogy.mathlearning.ui.presentation.solve_math.TakeMathImages
 import com.trilogy.mathlearning.ui.presentation.solve_math.TakeMathViewModel
 import com.trilogy.mathlearning.ui.presentation.splash.SplashScreen
@@ -36,6 +37,83 @@ fun AppNavigation(startDestination: String) {
 
         composable(Screen.Splash.route){
             SplashScreen()
+        }
+
+        //create post
+        composable(Screen.CreatePost.route) {
+            CreateCommunityPostScreen(
+                navController = navController,
+                onPosted = { navController.popBackStack() }
+            )
+        }
+
+// 2) Nested graph editor riêng cho CreatePost (không đụng editor của AI)
+        navigation(
+            startDestination = Screen.ScanCrop.route,
+            route = "editor_post"
+        ) {
+            composable(Screen.ScanCrop.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry("editor_post")
+                }
+                val vm: com.trilogy.mathlearning.ui.presentation.camera.EditorViewModel =
+                    hiltViewModel(parentEntry)
+
+                com.trilogy.mathlearning.ui.presentation.camera.ScanCropScreen { bmp, rect, origin ->
+                    vm.setInput(bmp, rect, origin)
+                    navController.navigate(Screen.CropEdit.route)
+                }
+            }
+
+            composable(Screen.CropEdit.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry("editor_post")
+                }
+                val vm: com.trilogy.mathlearning.ui.presentation.camera.EditorViewModel =
+                    hiltViewModel(parentEntry)
+
+                val bmp = vm.bmp ?: run { navController.popBackStack(); return@composable }
+                val rect = vm.rect ?: run { navController.popBackStack(); return@composable }
+                val origin = vm.origin ?: run { navController.popBackStack(); return@composable }
+
+                com.trilogy.mathlearning.ui.presentation.camera.CropEditorScreen(
+                    bitmap = bmp,
+                    initialRect = rect,
+                    origin = origin,
+                    onDone = { cropped ->
+                        vm.setCropped(cropped)
+                        navController.navigate(Screen.CroppedPreview.route)
+                    },
+                    onCancel = { navController.popBackStack() }
+                )
+            }
+
+
+            composable(Screen.CroppedPreview.route) { backStackEntry ->
+                val editorEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry("editor_post")
+                }
+                val vmEditor: com.trilogy.mathlearning.ui.presentation.camera.EditorViewModel =
+                    hiltViewModel(editorEntry)
+
+                // LẤY TakeMathViewModel scoped THEO MÀN CREATE POST
+                val hostEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.CreatePost.route)
+                }
+                val hostVm: com.trilogy.mathlearning.ui.presentation.solve_math.TakeMathViewModel =
+                    hiltViewModel(hostEntry)
+
+                val cropped = vmEditor.cropped ?: run { navController.popBackStack(); return@composable }
+
+                com.trilogy.mathlearning.ui.presentation.camera.CroppedPreviewScreen(
+                    image = cropped,
+                    onClose = {
+                        // Thay ảnh và UPLOAD NGAY TRONG VIEWMODEL
+                        hostVm.replaceWithAndUpload(cropped)
+                        navController.popBackStack("editor_post", inclusive = true)
+                    }
+                )
+            }
         }
 
 

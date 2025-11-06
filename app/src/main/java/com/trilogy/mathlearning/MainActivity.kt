@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
             MathLearningTheme(darkTheme = false) {
                 val screen by splashViewModel.startDestination
                 AppNavigation(startDestination = screen)
+
             }
         }
     }

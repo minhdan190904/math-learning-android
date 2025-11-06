@@ -30,7 +30,7 @@ fun SubmitDialogBig(
                 Spacer(Modifier.height(10.dp))
                 // Ảnh minh hoạ giữa dialog (bạn đã có)
                 Image(
-                    painter = painterResource(R.drawable.ic_loading_screen), // ảnh popup của bạn
+                    painter = painterResource(R.drawable.img_submit), // ảnh popup của bạn
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth().height(160.dp)
                 )

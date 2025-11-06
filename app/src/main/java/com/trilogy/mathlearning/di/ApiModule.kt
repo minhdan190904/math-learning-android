@@ -1,6 +1,10 @@
 package com.trilogy.mathlearning.di
 
+import com.trilogy.mathlearning.network.api.AnswerApi
 import com.trilogy.mathlearning.network.api.AuthApi
+import com.trilogy.mathlearning.network.api.MathConfigApi
+import com.trilogy.mathlearning.network.api.PracticeApi
+import com.trilogy.mathlearning.network.api.QuestionApi
 import com.trilogy.mathlearning.network.api.UserApi
 import com.trilogy.mathlearning.utils.BASE_DOMAIN
 import com.trilogy.mathlearning.utils.tokenApi
@@ -37,7 +41,7 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(authInterceptor: Interceptor): OkHttpClient{
+    fun provideHttpClient(authInterceptor: Interceptor): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -49,7 +53,7 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(httpClient: OkHttpClient): Retrofit{
+    fun provideRetrofit(httpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://$BASE_DOMAIN/")
             .client(httpClient)
@@ -62,4 +66,16 @@ object ApiModule {
 
     @Provides
     fun provideUserApi(retrofit: Retrofit): UserApi = retrofit.create(UserApi::class.java)
+
+    @Provides
+    fun provideQuestionApi(retrofit: Retrofit): QuestionApi = retrofit.create(QuestionApi::class.java)
+
+    @Provides
+    fun provideAnswerApi(retrofit: Retrofit): AnswerApi = retrofit.create(AnswerApi::class.java)
+
+    @Provides
+    fun provideMathConfigApi(retrofit: Retrofit): MathConfigApi = retrofit.create(MathConfigApi::class.java)
+
+    @Provides
+    fun providePracticeApi(retrofit: Retrofit): PracticeApi = retrofit.create(PracticeApi::class.java)
 }

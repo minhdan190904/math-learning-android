@@ -12,12 +12,12 @@ plugins {
 
 android {
     namespace = "com.trilogy.mathlearning"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.trilogy.mathlearning"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -68,6 +68,10 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -153,4 +157,10 @@ dependencies {
 
     //shared
     implementation("androidx.preference:preference:1.2.1")
+
+    //animation
+    implementation("com.google.accompanist:accompanist-placeholder-material3:0.36.0")
+
+    //lottie animation for jetpack compose
+    implementation("com.airbnb.android:lottie-compose:6.0.0")
 }
