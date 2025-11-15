@@ -1,6 +1,11 @@
 package com.trilogy.mathlearning.ui.presentation.bottom_navigation
 
+import android.graphics.Color
 import android.net.Uri
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -56,16 +61,30 @@ fun HomeRoot(
                     }
                 )
             }
-        }
+        },
     ) { inner ->
         NavHost(
             navController = navController,
             startDestination = BottomDest.Home.route,
             modifier = Modifier.padding(bottom = inner.calculateBottomPadding())
         ) {
-            composable(BottomDest.Home.route) { HomeScreen() }
+            composable(
+                route = BottomDest.Home.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) {
+                HomeScreen()
+            }
 
-            composable(BottomDest.Community.route) {
+            composable(
+                route = BottomDest.Community.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) {
                 CommunityScreen(
                     onOpenPost = { postId ->
                         val encoded = Uri.encode(postId)
@@ -75,10 +94,33 @@ fun HomeRoot(
                 )
             }
 
-            composable(BottomDest.SolveMath.route) { SolveMathScreen(navController = navControllerApp) }
-            composable(BottomDest.Profile.route) { ProfileScreen() }
+            composable(
+                route = BottomDest.SolveMath.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) {
+                SolveMathScreen(navController = navControllerApp)
+            }
 
-            composable(BottomDest.Practice.route) { backStackEntry ->
+            composable(
+                route = BottomDest.Profile.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) {
+                ProfileScreen()
+            }
+
+            composable(
+                route = BottomDest.Practice.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
@@ -96,7 +138,11 @@ fun HomeRoot(
 
             composable(
                 route = "practice/chapters/{grade}",
-                arguments = listOf(navArgument("grade") { type = NavType.IntType })
+                arguments = listOf(navArgument("grade") { type = NavType.IntType }),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
@@ -121,7 +167,11 @@ fun HomeRoot(
                 arguments = listOf(
                     navArgument("grade") { type = NavType.IntType },
                     navArgument("chapterId") { type = NavType.IntType }
-                )
+                ),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
@@ -146,7 +196,11 @@ fun HomeRoot(
 
             composable(
                 route = "practice/play/{practiceId}",
-                arguments = listOf(navArgument("practiceId") { type = NavType.StringType })
+                arguments = listOf(navArgument("practiceId") { type = NavType.StringType }),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
@@ -169,7 +223,11 @@ fun HomeRoot(
 
             composable(
                 route = "practice/result/{practiceId}",
-                arguments = listOf(navArgument("practiceId") { type = NavType.StringType })
+                arguments = listOf(navArgument("practiceId") { type = NavType.StringType }),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
@@ -193,7 +251,11 @@ fun HomeRoot(
 
             composable(
                 route = "practice/check/{practiceId}",
-                arguments = listOf(navArgument("practiceId") { type = NavType.StringType })
+                arguments = listOf(navArgument("practiceId") { type = NavType.StringType }),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
@@ -211,7 +273,11 @@ fun HomeRoot(
 
             composable(
                 route = "question/{postId}",
-                arguments = listOf(navArgument("postId") { type = NavType.StringType })
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getString("postId") ?: return@composable
                 QuestionDetailScreen(

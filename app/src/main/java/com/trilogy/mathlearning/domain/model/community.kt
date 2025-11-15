@@ -19,7 +19,8 @@ data class AnswerResDto(
     val content: String,
     val imageUrl: String? = null,
     val likedBy: List<String> = emptyList(),
-    val likes: Int = 0
+    val likes: Int = 0,
+    val isAI: Boolean = false
 )
 
 @Serializable
@@ -48,5 +49,6 @@ data class ToggleLikeAnswerReqDto(val answerId: String)
 data class CreateAnswerReqDto(
     val questionId: String,
     val content: String? = null,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val isAI: Boolean = false
 )

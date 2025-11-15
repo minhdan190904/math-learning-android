@@ -1,5 +1,9 @@
 package com.trilogy.mathlearning.ui.presentation.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,29 +34,50 @@ fun AppNavigation(startDestination: String) {
         startDestination = startDestination
     ) {
 
-        composable(Screen.Welcome.route) {
-            // Welcome Screen
+        composable(
+            route = Screen.Welcome.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+        ) {
             WelcomeScreen(navController = navController)
         }
 
-        composable(Screen.Splash.route){
+        composable(
+            route = Screen.Splash.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+        ) {
             SplashScreen()
         }
 
-        //create post
-        composable(Screen.CreatePost.route) {
+        composable(
+            route = Screen.CreatePost.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+        ) {
             CreateCommunityPostScreen(
                 navController = navController,
                 onPosted = { navController.popBackStack() }
             )
         }
 
-// 2) Nested graph editor riêng cho CreatePost (không đụng editor của AI)
         navigation(
             startDestination = Screen.ScanCrop.route,
             route = "editor_post"
         ) {
-            composable(Screen.ScanCrop.route) { backStackEntry ->
+            composable(
+                route = Screen.ScanCrop.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("editor_post")
                 }
@@ -65,7 +90,13 @@ fun AppNavigation(startDestination: String) {
                 }
             }
 
-            composable(Screen.CropEdit.route) { backStackEntry ->
+            composable(
+                route = Screen.CropEdit.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("editor_post")
                 }
@@ -88,15 +119,19 @@ fun AppNavigation(startDestination: String) {
                 )
             }
 
-
-            composable(Screen.CroppedPreview.route) { backStackEntry ->
+            composable(
+                route = Screen.CroppedPreview.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
                 val editorEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("editor_post")
                 }
                 val vmEditor: com.trilogy.mathlearning.ui.presentation.camera.EditorViewModel =
                     hiltViewModel(editorEntry)
 
-                // LẤY TakeMathViewModel scoped THEO MÀN CREATE POST
                 val hostEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(Screen.CreatePost.route)
                 }
@@ -108,7 +143,6 @@ fun AppNavigation(startDestination: String) {
                 com.trilogy.mathlearning.ui.presentation.camera.CroppedPreviewScreen(
                     image = cropped,
                     onClose = {
-                        // Thay ảnh và UPLOAD NGAY TRONG VIEWMODEL
                         hostVm.replaceWithAndUpload(cropped)
                         navController.popBackStack("editor_post", inclusive = true)
                     }
@@ -116,9 +150,13 @@ fun AppNavigation(startDestination: String) {
             }
         }
 
-
-        //Register
-        composable(Screen.Register.route) {
+        composable(
+            route = Screen.Register.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+        ) {
             RegisterScreen(
                 onGoActivate = {
                     navController.navigate(Screen.Activate.route + "/$it")
@@ -129,8 +167,13 @@ fun AppNavigation(startDestination: String) {
             )
         }
 
-        //activate
-        composable(Screen.Activate.route + "/{email}") {
+        composable(
+            route = Screen.Activate.route + "/{email}",
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+        ) {
             val email = it.arguments?.getString("email")
             ActivateScreen(
                 email = email ?: "",
@@ -143,8 +186,13 @@ fun AppNavigation(startDestination: String) {
             )
         }
 
-        // Login
-        composable(Screen.Login.route) {
+        composable(
+            route = Screen.Login.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+        ) {
             LoginScreen(
                 onLoginSuccess = { navController.navigate(Screen.HomeRoot.route) },
                 onSignUpClick = {
@@ -153,22 +201,37 @@ fun AppNavigation(startDestination: String) {
             )
         }
 
-        //Take Math Image
-        composable(Screen.TakeMathImage.route) {
+        composable(
+            route = Screen.TakeMathImage.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+        ) {
             TakeMathImages(navController = navController)
         }
 
-        composable(Screen.HomeRoot.route){
+        composable(
+            route = Screen.HomeRoot.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+        ) {
             HomeRoot(navControllerApp = navController)
         }
 
-        // Nested graph Editor (Scan → Crop → Preview)
         navigation(
             startDestination = Screen.ScanCrop.route,
             route = "editor"
         ) {
-            // Scan
-            composable(Screen.ScanCrop.route) { backStackEntry ->
+            composable(
+                route = Screen.ScanCrop.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("editor")
                 }
@@ -180,8 +243,13 @@ fun AppNavigation(startDestination: String) {
                 }
             }
 
-            // Crop
-            composable(Screen.CropEdit.route) { backStackEntry ->
+            composable(
+                route = Screen.CropEdit.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("editor")
                 }
@@ -203,8 +271,13 @@ fun AppNavigation(startDestination: String) {
                 )
             }
 
-            // Preview
-            composable(Screen.CroppedPreview.route) { backStackEntry ->
+            composable(
+                route = Screen.CroppedPreview.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
                 val editorEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("editor")
                 }
@@ -220,13 +293,11 @@ fun AppNavigation(startDestination: String) {
                 CroppedPreviewScreen(
                     image = cropped,
                     onClose = {
-                        // (tuỳ chọn) downscale trước khi add để tiết kiệm RAM
-                        hostVm.addImage(cropped /*.downscale()*/)
+                        hostVm.addImage(cropped)
                         navController.popBackStack("editor", inclusive = true)
                     }
                 )
             }
-
         }
     }
 }

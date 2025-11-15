@@ -163,4 +163,6 @@ dependencies {
 
     //lottie animation for jetpack compose
     implementation("com.airbnb.android:lottie-compose:6.0.0")
+
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.5-beta")
 }

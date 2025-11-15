@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.trilogy.mathlearning.ui.presentation.math.Exam
 import com.trilogy.mathlearning.ui.presentation.math.ExamListScreen
 import com.trilogy.mathlearning.ui.presentation.math.ExamTakingScreen
@@ -32,14 +33,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
         installSplashScreen().setKeepOnScreenCondition {
             !splashViewModel.isLoading.value
         }
 
         setContent {
             MathLearningTheme(darkTheme = false) {
+                SetSystemBarsWhite()
                 val screen by splashViewModel.startDestination
                 AppNavigation(startDestination = screen)
 
@@ -74,6 +74,22 @@ fun TestExamScreens() {
                 println("Kết quả: $answers")
                 currentExam = null
             }
+        )
+    }
+}
+
+@Composable
+fun SetSystemBarsWhite() {
+    val systemUiController = rememberSystemUiController()
+
+    androidx.compose.runtime.SideEffect {
+        systemUiController.setStatusBarColor(
+            color = androidx.compose.ui.graphics.Color.White,
+            darkIcons = true
+        )
+        systemUiController.setNavigationBarColor(
+            color = androidx.compose.ui.graphics.Color.White,
+            darkIcons = true
         )
     }
 }
