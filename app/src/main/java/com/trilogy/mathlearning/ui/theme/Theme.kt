@@ -18,21 +18,11 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-    background = Color.White,   // <-- ÉP NỀN TRẮNG
-    surface = Color.White,
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = Color(0xFF1565C0),      // Xanh dương đậm
+    secondary = Color(0xFF64B5F6),    // Xanh dương nhạt
+    tertiary = Color(0xFF26A69A),     // Xanh teal
+    background = Color.White,         // NỀN TRẮNG
+    surface = Color.White             // SURFACE TRẮNG
 )
 
 @Composable

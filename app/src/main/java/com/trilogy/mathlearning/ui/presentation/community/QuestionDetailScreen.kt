@@ -81,7 +81,7 @@ private fun DetailContent(inner: PaddingValues, post: QuestionResDto, onToggleLi
         if (!post.content.isNullOrBlank()) {
             item {
                 Text(
-                    text = post.content!!,
+                    text = post.content,
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                     fontSize = 15.sp, lineHeight = 20.sp
                 )

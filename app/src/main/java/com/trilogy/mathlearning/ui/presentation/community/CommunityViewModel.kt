@@ -71,6 +71,14 @@ class CommunityViewModel @Inject constructor(
         }
     }
 
+    fun createAnswer(questionId: String, content: String?, imageUrl: String?, isAI: Boolean) =
+        viewModelScope.launch {
+            when (repo.createAnswer(questionId, content, imageUrl, isAI)) {
+                is NetworkResource.Success -> loadQuestionDetail(questionId)
+                else -> {}
+            }
+        }
+
     fun toggleLike(answerId: String, questionId: String) = viewModelScope.launch {
         when (repo.toggleLike(answerId)) {
             is NetworkResource.Success -> loadQuestionDetail(questionId) // like/unlike xong reload

@@ -5,6 +5,7 @@ import com.trilogy.mathlearning.network.api.AuthApi
 import com.trilogy.mathlearning.network.api.MathConfigApi
 import com.trilogy.mathlearning.network.api.PracticeApi
 import com.trilogy.mathlearning.network.api.QuestionApi
+import com.trilogy.mathlearning.network.api.StatisticApi
 import com.trilogy.mathlearning.network.api.UserApi
 import com.trilogy.mathlearning.utils.BASE_DOMAIN
 import com.trilogy.mathlearning.utils.tokenApi
@@ -78,4 +79,8 @@ object ApiModule {
 
     @Provides
     fun providePracticeApi(retrofit: Retrofit): PracticeApi = retrofit.create(PracticeApi::class.java)
+
+    @Provides
+    fun provideStatisticApi(retrofit: Retrofit): StatisticApi = retrofit.create(StatisticApi::class.java)
+
 }

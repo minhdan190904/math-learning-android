@@ -42,16 +42,17 @@ class CommunityRepository @Inject constructor(
         return handleNetworkCall({ questionApi.createQuestion(body) }, common)
     }
 
-    /** ANSWER */
     suspend fun createAnswer(
         questionId: String,
         content: String?,
-        imageUrl: String?
+        imageUrl: String?,
+        isAI: Boolean = false
     ): NetworkResource<AnswerResDto> {
         val body = CreateAnswerReqDto(
             questionId = questionId,
             content = content?.takeIf { it.isNotBlank() },
-            imageUrl = imageUrl?.takeIf { it.isNotBlank() }
+            imageUrl = imageUrl?.takeIf { it.isNotBlank() },
+            isAI = isAI
         )
         return handleNetworkCall({ answerApi.createAnswer(body) }, common)
     }

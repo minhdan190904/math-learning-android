@@ -1,10 +1,10 @@
 package com.trilogy.mathlearning.ui.presentation.math
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trilogy.mathlearning.data.repository.PracticeRepository
 import com.trilogy.mathlearning.domain.model.ExerciseResDto
+import com.trilogy.mathlearning.domain.model.ListPracticesResDto
 import com.trilogy.mathlearning.domain.model.MathConfigResDto
 import com.trilogy.mathlearning.domain.model.PracticeResDto
 import com.trilogy.mathlearning.domain.model.SubmitAnswerReqDto
@@ -24,22 +24,12 @@ class PracticeFlowViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private const val TAG = "PracticeFlowVM"
         private const val DEFAULT_DURATION_MIN = 45
         private val LABELS = listOf("A", "B", "C", "D", "E", "F")
     }
 
     private val _configState = MutableStateFlow<UiState<MathConfigResDto>>(UiState.Empty)
     val configState: StateFlow<UiState<MathConfigResDto>> = _configState
-
-    fun loadConfig() = viewModelScope.launch {
-        _configState.value = UiState.Loading
-        when (val r = repo.getMathConfig()) {
-            is NetworkResource.Success -> _configState.value = UiState.Success(r.data)
-            is NetworkResource.Error -> _configState.value = UiState.Failure(r.message)
-            is NetworkResource.NetworkException -> _configState.value = UiState.Failure(r.message)
-        }
-    }
 
     private val _createState = MutableStateFlow<UiState<PracticeResDto>>(UiState.Empty)
     val createState: StateFlow<UiState<PracticeResDto>> = _createState
@@ -53,15 +43,28 @@ class PracticeFlowViewModel @Inject constructor(
     private val _examUi = MutableStateFlow<Exam?>(null)
     val examUi: StateFlow<Exam?> = _examUi
 
+    private val _historyState = MutableStateFlow<UiState<ListPracticesResDto>>(UiState.Empty)
+    val historyState: StateFlow<UiState<ListPracticesResDto>> = _historyState
+
     val selectedAnswers = mutableMapOf<String, Int>()
     var timeSpentSec: Int = 0
         private set
     private var timerJob: Job? = null
 
+    fun loadConfig() = viewModelScope.launch {
+        _configState.value = UiState.Loading
+        when (val r = repo.getMathConfig()) {
+            is NetworkResource.Success -> _configState.value = UiState.Success(r.data)
+            is NetworkResource.Error -> _configState.value = UiState.Failure(r.message)
+            is NetworkResource.NetworkException -> _configState.value = UiState.Failure(r.message)
+        }
+    }
+
     fun clearCreateState() { _createState.value = UiState.Empty }
     fun clearExercisesState() { _exercisesState.value = UiState.Empty }
     fun clearSubmitState() { _submitState.value = UiState.Empty }
     fun clearExamUi() { _examUi.value = null }
+    fun clearHistoryState() { _historyState.value = UiState.Empty }
 
     fun resetAllForNewPractice() {
         _createState.value = UiState.Empty
@@ -123,6 +126,15 @@ class PracticeFlowViewModel @Inject constructor(
             is NetworkResource.Success -> _submitState.value = UiState.Success(r.data)
             is NetworkResource.Error -> _submitState.value = UiState.Failure(r.message)
             is NetworkResource.NetworkException -> _submitState.value = UiState.Failure(r.message)
+        }
+    }
+
+    fun loadHistory() = viewModelScope.launch {
+        _historyState.value = UiState.Loading
+        when (val r = repo.listPractices()) {
+            is NetworkResource.Success -> _historyState.value = UiState.Success(r.data)
+            is NetworkResource.Error -> _historyState.value = UiState.Failure(r.message)
+            is NetworkResource.NetworkException -> _historyState.value = UiState.Failure(r.message)
         }
     }
 

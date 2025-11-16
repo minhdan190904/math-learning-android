@@ -1,6 +1,5 @@
 package com.trilogy.mathlearning.ui.presentation.bottom_navigation
 
-import android.graphics.Color
 import android.net.Uri
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,12 +28,17 @@ import com.trilogy.mathlearning.ui.presentation.home.HomeScreen
 import com.trilogy.mathlearning.ui.presentation.math.ChapterPickerScreen
 import com.trilogy.mathlearning.ui.presentation.math.CheckResultScreen
 import com.trilogy.mathlearning.ui.presentation.math.ExamHostScreen
+import com.trilogy.mathlearning.ui.presentation.math.PracticeFlowViewModel
+import com.trilogy.mathlearning.ui.presentation.math.PracticeHistoryScreen
 import com.trilogy.mathlearning.ui.presentation.math.PracticeHomeScreen
 import com.trilogy.mathlearning.ui.presentation.math.PracticeLoadingScreen
 import com.trilogy.mathlearning.ui.presentation.math.PracticeResultScreen
 import com.trilogy.mathlearning.ui.presentation.navigation.Screen
 import com.trilogy.mathlearning.ui.presentation.profile.ProfileScreen
+import com.trilogy.mathlearning.ui.presentation.solve_math.SolveHistoryDetailScreen
 import com.trilogy.mathlearning.ui.presentation.solve_math.SolveMathScreen
+import com.trilogy.mathlearning.ui.presentation.statistic.LeaderboardScreen
+import com.trilogy.mathlearning.ui.presentation.statistic.StatisticViewModel
 
 @Composable
 fun HomeRoot(
@@ -90,7 +94,23 @@ fun HomeRoot(
                         val encoded = Uri.encode(postId)
                         navController.navigate("question/$encoded")
                     },
-                    onCreatePost = { navControllerApp.navigate(Screen.CreatePost.route) }
+                    onCreatePost = { navControllerApp.navigate(Screen.CreatePost.route) },
+                    onOpenLeaderboard = { navController.navigate("stats/leaderboard") }
+                )
+            }
+
+            composable(
+                route = "stats/leaderboard",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
+                val vm: StatisticViewModel = hiltViewModel(backStackEntry)
+
+                LeaderboardScreen(
+                    vm = vm,
+                    onBack = { navController.popBackStack() }
                 )
             }
 
@@ -101,8 +121,28 @@ fun HomeRoot(
                 popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) {
-                SolveMathScreen(navController = navControllerApp)
+                SolveMathScreen(
+                    navControllerApp = navControllerApp,
+                    navControllerInner = navController
+                )
             }
+
+            composable(
+                route = "solve-history/{questionId}",
+                arguments = listOf(navArgument("questionId") { type = NavType.StringType }),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("questionId") ?: return@composable
+
+                SolveHistoryDetailScreen(
+                    questionId = id,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
 
             composable(
                 route = BottomDest.Profile.route,
@@ -124,15 +164,37 @@ fun HomeRoot(
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
-                val vm: com.trilogy.mathlearning.ui.presentation.math.PracticeFlowViewModel =
-                    hiltViewModel(parentEntry)
+                val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
 
                 PracticeHomeScreen(
                     vm = vm,
                     onPickGrade = { grade ->
                         navController.navigate("practice/chapters/$grade")
                     },
-                    onOpenHistory = { }
+                    onOpenHistory = {
+                        navController.navigate("practice/history")
+                    }
+                )
+            }
+
+            composable(
+                route = "practice/history",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(BottomDest.Practice.route)
+                }
+                val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
+
+                PracticeHistoryScreen(
+                    vm = vm,
+                    onBack = { navController.popBackStack() },
+                    onOpenDetail = { id ->
+                        navController.navigate("practice/check/$id")
+                    }
                 )
             }
 
@@ -147,8 +209,7 @@ fun HomeRoot(
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
-                val vm: com.trilogy.mathlearning.ui.presentation.math.PracticeFlowViewModel =
-                    hiltViewModel(parentEntry)
+                val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
 
                 val grade = backStackEntry.arguments?.getInt("grade") ?: return@composable
                 ChapterPickerScreen(
@@ -176,8 +237,7 @@ fun HomeRoot(
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
-                val vm: com.trilogy.mathlearning.ui.presentation.math.PracticeFlowViewModel =
-                    hiltViewModel(parentEntry)
+                val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
 
                 val g = backStackEntry.arguments?.getInt("grade") ?: return@composable
                 val c = backStackEntry.arguments?.getInt("chapterId") ?: return@composable
@@ -205,8 +265,7 @@ fun HomeRoot(
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
-                val vm: com.trilogy.mathlearning.ui.presentation.math.PracticeFlowViewModel =
-                    hiltViewModel(parentEntry)
+                val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
 
                 val pid = backStackEntry.arguments?.getString("practiceId") ?: return@composable
                 ExamHostScreen(
@@ -232,8 +291,7 @@ fun HomeRoot(
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
-                val vm: com.trilogy.mathlearning.ui.presentation.math.PracticeFlowViewModel =
-                    hiltViewModel(parentEntry)
+                val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
 
                 val pid = backStackEntry.arguments?.getString("practiceId") ?: return@composable
                 PracticeResultScreen(
@@ -260,8 +318,7 @@ fun HomeRoot(
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
-                val vm: com.trilogy.mathlearning.ui.presentation.math.PracticeFlowViewModel =
-                    hiltViewModel(parentEntry)
+                val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
 
                 val pid = backStackEntry.arguments?.getString("practiceId") ?: return@composable
                 CheckResultScreen(

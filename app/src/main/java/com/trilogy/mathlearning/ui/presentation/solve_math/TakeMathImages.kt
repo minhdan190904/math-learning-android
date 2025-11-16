@@ -73,23 +73,25 @@ fun TakeMathImages(
 ) {
     val vm: TakeMathViewModel = hiltViewModel()
     val images by vm.images.collectAsState()
+    val selectedItem by vm.selectedItemSolveStyle.collectAsState()
+    val baiToanState by vm.result.collectAsState()
+    val uploadState by vm.imageUploadState.collectAsState()
 
     var showSolveStyleOptions by remember { mutableStateOf(false) }
     val listSolveStyle = SolveStyles.all
-    val selectedItem by vm.selectedItemSolveStyle.collectAsState()
-    val baiToan by vm.result.collectAsState()
+
     val context = LocalContext.current
     val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_no_image)
-
 
     Scaffold(
         topBar = {
             TopBar { navController.popBackStack() }
         },
         bottomBar = {
-            ConfirmBottomBar(onConfirm = {
-                vm.solve(images)
-            }, enabled = images.isNotEmpty())
+            ConfirmBottomBar(
+                onConfirm = { vm.solve(images) },
+                enabled = images.isNotEmpty() && baiToanState !is UiState.Loading
+            )
         },
         containerColor = Color.White
     ) { innerPadding ->
@@ -112,10 +114,9 @@ fun TakeMathImages(
             Spacer(Modifier.height(16.dp))
 
             Text("Ảnh", style = MaterialTheme.typography.labelLarge)
-
             Spacer(Modifier.height(8.dp))
 
-            if(images.isEmpty()) {
+            if (images.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -184,50 +185,76 @@ fun TakeMathImages(
                 Text("Thêm ảnh", color = Color.LightGray)
             }
 
+            Spacer(Modifier.height(8.dp))
+
+            when (uploadState) {
+                is UiState.Loading -> {
+                    Text(
+                        text = "Đang tải ảnh lên...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.height(4.dp))
+                }
+                is UiState.Failure -> {
+                    val err = (uploadState as UiState.Failure).error ?: "Tải ảnh thất bại"
+                    Text(
+                        text = err,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Red
+                    )
+                    Spacer(Modifier.height(4.dp))
+                }
+                else -> {}
+            }
+
             Spacer(Modifier.height(16.dp))
 
-            if(baiToan is UiState.Success){
-                val result = (baiToan as UiState.Success<BaiToan>).data
-                Column {
-
-                    Text(
-                        text = "Loại bài toán",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    MathInlineSentence(
-                        raw = result.category
-                    )
-
-                    Text(
-                        text = "Kết quả giải toán",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    MathInlineSentence(
-                        raw = result.result
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-
-                    Text(
-                        text = "Các bước giải",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    for(step in result.steps){
-                        MathInlineSentence(
-                            raw = "• $step"
+            when (baiToanState) {
+                is UiState.Success -> {
+                    val result = (baiToanState as UiState.Success<BaiToan>).data
+                    Column {
+                        Text(
+                            text = "Loại bài toán",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
                         )
+                        Spacer(Modifier.height(8.dp))
+                        MathInlineSentence(raw = result.category)
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Text(
+                            text = "Kết quả giải toán",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        MathInlineSentence(raw = result.result)
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Text(
+                            text = "Các bước giải",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(Modifier.height(8.dp))
+
+                        result.steps.forEach { step ->
+                            MathInlineSentence(raw = "• $step")
+                        }
                     }
                 }
+                is UiState.Failure -> {
+                    val err = (baiToanState as UiState.Failure).error ?: "Giải toán thất bại"
+                    Text(
+                        text = err,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Red
+                    )
+                }
+                else -> {}
             }
         }
     }
@@ -242,11 +269,10 @@ fun TakeMathImages(
         )
     }
 
-    if(baiToan is UiState.Loading){
+    if (baiToanState is UiState.Loading) {
         LoadingSolveMathScreen()
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -256,17 +282,17 @@ fun TopBar(
     TopAppBar(
         title = { Text("Thêm ảnh giải toán") },
         navigationIcon = {
-            IconButton(onClick = { onClose }) {
+            IconButton(onClick = onClose) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Quay lại",
-                    tint = Color.Black,
+                    tint = Color.Black
                 )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color(0xFFF5F5F5).copy(alpha = 0.9f),
-            titleContentColor = Color.Black,
+            titleContentColor = Color.Black
         )
     )
 }
@@ -277,7 +303,6 @@ private fun ConfirmBottomBar(onConfirm: () -> Unit, enabled: Boolean = true) {
         tonalElevation = 3.dp,
         color = Color(0xFFF5F5F5).copy(alpha = 0.9f)
     ) {
-        // padding để không đè lên gesture bar/IME
         Row(
             Modifier
                 .fillMaxWidth()
@@ -341,7 +366,6 @@ fun SolveStyleOption(
     }
 }
 
-
 @Composable
 private fun TutorBanner() {
     Surface(
@@ -355,7 +379,6 @@ private fun TutorBanner() {
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Nhóm avatar
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
@@ -416,7 +439,6 @@ private fun BitmapThumb(bitmap: Bitmap, onRemove: () -> Unit, modifier: Modifier
         modifier = modifier
             .clip(shape)
             .border(1.dp, MaterialTheme.colorScheme.outline.copy(0.25f), shape)
-
     ) {
         CustomImageDisplay(
             bitmap = bitmap,
@@ -448,4 +470,3 @@ fun DemoReview() {
     val navController = NavController(context = LocalContext.current)
     TakeMathImages(navController)
 }
-
