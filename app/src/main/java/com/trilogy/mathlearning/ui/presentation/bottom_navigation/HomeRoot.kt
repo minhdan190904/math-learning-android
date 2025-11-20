@@ -43,6 +43,7 @@ import com.trilogy.mathlearning.ui.presentation.statistic.StatisticViewModel
 @Composable
 fun HomeRoot(
     navControllerApp: NavController,
+    onLogout: () -> Unit
 ) {
     val navController = rememberNavController()
     val bottomRoutes = bottomItems.map { it.route }.toSet()
@@ -143,7 +144,6 @@ fun HomeRoot(
                 )
             }
 
-
             composable(
                 route = BottomDest.Profile.route,
                 enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
@@ -151,7 +151,10 @@ fun HomeRoot(
                 popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) {
-                ProfileScreen()
+                ProfileScreen(
+                    onBack = {},
+                    onLogoutSuccess = onLogout
+                )
             }
 
             composable(
@@ -217,14 +220,18 @@ fun HomeRoot(
                     vm = vm,
                     onStartPractice = { },
                     onBack = { navController.popBackStack() },
-                    onStartLoading = { g, chapterId ->
-                        navController.navigate("practice/loading/$g/$chapterId")
+                    onStartLoading = { g, chapterId, examType ->
+                        if (chapterId != null) {
+                            navController.navigate("practice/loading-chapter/$g/$chapterId")
+                        } else if (examType != null) {
+                            navController.navigate("practice/loading-exam/$g/$examType")
+                        }
                     }
                 )
             }
 
             composable(
-                route = "practice/loading/{grade}/{chapterId}",
+                route = "practice/loading-chapter/{grade}/{chapterId}",
                 arguments = listOf(
                     navArgument("grade") { type = NavType.IntType },
                     navArgument("chapterId") { type = NavType.IntType }
@@ -244,10 +251,43 @@ fun HomeRoot(
                 PracticeLoadingScreen(
                     grade = g,
                     chapterId = c,
+                    examType = null,
                     vm = vm,
                     onReady = { pid ->
                         navController.navigate("practice/play/$pid") {
-                            popUpTo("practice/loading/$g/$c") { inclusive = true }
+                            popUpTo("practice/loading-chapter/$g/$c") { inclusive = true }
+                        }
+                    },
+                    onCancel = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "practice/loading-exam/{grade}/{examType}",
+                arguments = listOf(
+                    navArgument("grade") { type = NavType.IntType },
+                    navArgument("examType") { type = NavType.StringType }
+                ),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(BottomDest.Practice.route)
+                }
+                val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
+
+                val g = backStackEntry.arguments?.getInt("grade") ?: return@composable
+                val examType = backStackEntry.arguments?.getString("examType") ?: return@composable
+                PracticeLoadingScreen(
+                    grade = g,
+                    chapterId = null,
+                    examType = examType,
+                    vm = vm,
+                    onReady = { pid ->
+                        navController.navigate("practice/play/$pid") {
+                            popUpTo("practice/loading-exam/$g/$examType") { inclusive = true }
                         }
                     },
                     onCancel = { navController.popBackStack() }

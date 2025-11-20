@@ -4,7 +4,15 @@ import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,8 +20,24 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,9 +67,10 @@ fun LoginScreen(
     val primaryBlue = Color(0xFF1677FF)
     val cardShape = RoundedCornerShape(22.dp)
 
-    // điều hướng khi login thành công
     LaunchedEffect(ui) {
-        (ui as? UiState.Success<*>)?.data?.let { if (it is LoginResDto) onLoginSuccess() }
+        (ui as? UiState.Success<*>)?.data?.let {
+            if (it is LoginResDto) onLoginSuccess()
+        }
     }
 
     Box(
@@ -87,11 +112,11 @@ private fun ContentBlock(
 
     fun validate(): Boolean {
         emailErr = when {
-            email.isBlank() -> "Please enter email"
-            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Invalid email"
+            email.isBlank() -> "Vui lòng nhập email"
+            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Email không hợp lệ"
             else -> null
         }
-        passErr = if (pass.length < 6) "At least 6 characters" else null
+        passErr = if (pass.length < 6) "Mật khẩu phải có ít nhất 6 ký tự" else null
         return emailErr == null && passErr == null
     }
 
@@ -102,7 +127,6 @@ private fun ContentBlock(
             .padding(horizontal = 18.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Ảnh minh hoạ màu xanh ở đầu thẻ
         Image(
             painter = painterResource(id = R.drawable.login_illustration),
             contentDescription = null,
@@ -114,7 +138,7 @@ private fun ContentBlock(
 
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Log In",
+            text = "Đăng nhập",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF0D0D0D),
@@ -124,10 +148,13 @@ private fun ContentBlock(
         )
 
         Spacer(Modifier.height(14.dp))
-        Label("EMAIL ID")
+        Label("EMAIL")
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it; emailErr = null },
+            onValueChange = {
+                email = it
+                emailErr = null
+            },
             singleLine = true,
             isError = emailErr != null,
             shape = RoundedCornerShape(8.dp),
@@ -140,10 +167,13 @@ private fun ContentBlock(
         ErrorHint(emailErr)
 
         Spacer(Modifier.height(12.dp))
-        Label("PASSWORD")
+        Label("MẬT KHẨU")
         OutlinedTextField(
             value = pass,
-            onValueChange = { pass = it; passErr = null },
+            onValueChange = {
+                pass = it
+                passErr = null
+            },
             singleLine = true,
             isError = passErr != null,
             visualTransformation = if (showPass) VisualTransformation.None else PasswordVisualTransformation(),
@@ -151,7 +181,7 @@ private fun ContentBlock(
                 IconButton(onClick = { showPass = !showPass }) {
                     Icon(
                         if (showPass) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                        contentDescription = "Toggle password"
+                        contentDescription = null
                     )
                 }
             },
@@ -167,10 +197,10 @@ private fun ContentBlock(
         Spacer(Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End
         ) {
             Text(
-                "Forget Password ?",
+                "Quên mật khẩu?",
                 fontSize = 13.sp,
                 color = Color(0xFF1677FF),
                 modifier = Modifier.clickable { onForgotPasswordClick?.invoke() }
@@ -194,7 +224,7 @@ private fun ContentBlock(
                     color = Color.White
                 )
             } else {
-                Text("Login", color = Color.White, fontSize = 16.sp)
+                Text("Đăng nhập", color = Color.White, fontSize = 16.sp)
             }
         }
 
@@ -204,22 +234,25 @@ private fun ContentBlock(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Divider(modifier = Modifier.weight(1f), color = Color(0xFFE6E6E6))
-            Text("Or", modifier = Modifier.padding(horizontal = 10.dp), fontSize = 13.sp, color = Color(0xFF9AA0A6))
+            Text(
+                "Hoặc",
+                modifier = Modifier.padding(horizontal = 10.dp),
+                fontSize = 13.sp,
+                color = Color(0xFF9AA0A6)
+            )
             Divider(modifier = Modifier.weight(1f), color = Color(0xFFE6E6E6))
         }
-
-        // Không có icon mạng xã hội theo yêu cầu
 
         Spacer(Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Don't have an account?  ",
+                text = "Chưa có tài khoản?  ",
                 fontSize = 13.sp,
                 color = Color(0xFF70757A),
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Sign Up",
+                text = "Đăng ký",
                 fontSize = 13.sp,
                 color = Color(0xFF1677FF),
                 modifier = Modifier.clickable { onSignUpClick?.invoke() }

@@ -33,7 +33,6 @@ fun AppNavigation(startDestination: String) {
         navController = navController,
         startDestination = startDestination
     ) {
-
         composable(
             route = Screen.Welcome.route,
             enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
@@ -81,10 +80,9 @@ fun AppNavigation(startDestination: String) {
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("editor_post")
                 }
-                val vm: com.trilogy.mathlearning.ui.presentation.camera.EditorViewModel =
-                    hiltViewModel(parentEntry)
+                val vm: EditorViewModel = hiltViewModel(parentEntry)
 
-                com.trilogy.mathlearning.ui.presentation.camera.ScanCropScreen { bmp, rect, origin ->
+                ScanCropScreen { bmp, rect, origin ->
                     vm.setInput(bmp, rect, origin)
                     navController.navigate(Screen.CropEdit.route)
                 }
@@ -100,14 +98,13 @@ fun AppNavigation(startDestination: String) {
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("editor_post")
                 }
-                val vm: com.trilogy.mathlearning.ui.presentation.camera.EditorViewModel =
-                    hiltViewModel(parentEntry)
+                val vm: EditorViewModel = hiltViewModel(parentEntry)
 
                 val bmp = vm.bmp ?: run { navController.popBackStack(); return@composable }
                 val rect = vm.rect ?: run { navController.popBackStack(); return@composable }
                 val origin = vm.origin ?: run { navController.popBackStack(); return@composable }
 
-                com.trilogy.mathlearning.ui.presentation.camera.CropEditorScreen(
+                CropEditorScreen(
                     bitmap = bmp,
                     initialRect = rect,
                     origin = origin,
@@ -129,18 +126,16 @@ fun AppNavigation(startDestination: String) {
                 val editorEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("editor_post")
                 }
-                val vmEditor: com.trilogy.mathlearning.ui.presentation.camera.EditorViewModel =
-                    hiltViewModel(editorEntry)
+                val vmEditor: EditorViewModel = hiltViewModel(editorEntry)
 
                 val hostEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(Screen.CreatePost.route)
                 }
-                val hostVm: com.trilogy.mathlearning.ui.presentation.solve_math.TakeMathViewModel =
-                    hiltViewModel(hostEntry)
+                val hostVm: TakeMathViewModel = hiltViewModel(hostEntry)
 
                 val cropped = vmEditor.cropped ?: run { navController.popBackStack(); return@composable }
 
-                com.trilogy.mathlearning.ui.presentation.camera.CroppedPreviewScreen(
+                CroppedPreviewScreen(
                     image = cropped,
                     onClose = {
                         hostVm.replaceWithAndUpload(cropped)
@@ -162,7 +157,9 @@ fun AppNavigation(startDestination: String) {
                     navController.navigate(Screen.Activate.route + "/$it")
                 },
                 onSignInClick = {
-                    navController.navigate(Screen.Login.route)
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -181,7 +178,9 @@ fun AppNavigation(startDestination: String) {
                     navController.popBackStack()
                 },
                 onActivated = {
-                    navController.navigate(Screen.Login.route)
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Activate.route + "/{email}") { inclusive = true }
+                    }
                 }
             )
         }
@@ -194,7 +193,11 @@ fun AppNavigation(startDestination: String) {
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
         ) {
             LoginScreen(
-                onLoginSuccess = { navController.navigate(Screen.HomeRoot.route) },
+                onLoginSuccess = {
+                    navController.navigate(Screen.HomeRoot.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
                 onSignUpClick = {
                     navController.navigate(Screen.Register.route)
                 }
@@ -218,7 +221,14 @@ fun AppNavigation(startDestination: String) {
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
         ) {
-            HomeRoot(navControllerApp = navController)
+            HomeRoot(
+                navControllerApp = navController,
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.HomeRoot.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         navigation(

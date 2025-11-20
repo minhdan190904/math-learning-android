@@ -9,14 +9,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.*
-
 import com.trilogy.mathlearning.utils.UiState
 import kotlinx.coroutines.delay
 
 @Composable
 fun PracticeLoadingScreen(
     grade: Int,
-    chapterId: Int,
+    chapterId: Int?,
+    examType: String?,
     vm: PracticeFlowViewModel,
     onReady: (String) -> Unit,
     onCancel: () -> Unit
@@ -24,9 +24,9 @@ fun PracticeLoadingScreen(
     val create by vm.createState.collectAsState()
     var minDelayDone by remember { mutableStateOf(false) }
 
-    LaunchedEffect(grade, chapterId) {
+    LaunchedEffect(grade, chapterId, examType) {
         vm.resetAllForNewPractice()
-        vm.createPractice(grade, chapterId, null)
+        vm.createPractice(grade, chapterId, examType)
         delay(3000)
         minDelayDone = true
     }
@@ -37,11 +37,18 @@ fun PracticeLoadingScreen(
     }
 
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("bookstack.json"))
-    val progress by animateLottieCompositionAsState(composition = composition, iterations = LottieConstants.IterateForever)
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever
+    )
 
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            LottieAnimation(composition = composition, progress = { progress }, modifier = Modifier.size(220.dp))
+            LottieAnimation(
+                composition = composition,
+                progress = { progress },
+                modifier = Modifier.size(220.dp)
+            )
             Spacer(Modifier.height(12.dp))
             Text("Đang tải bài tập", style = MaterialTheme.typography.titleMedium)
         }

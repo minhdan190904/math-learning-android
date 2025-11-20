@@ -49,36 +49,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun TestExamScreens() {
-    val ctx = LocalContext.current
-    var currentExam by remember { mutableStateOf<Exam?>(null) }
-
-    if (currentExam == null) {
-        // đọc danh sách đề
-        val list = remember {
-            parseExamIndex(assetText(ctx, "exams/exams_index.json"))
-        }
-        ExamListScreen(
-            items = list,
-            onOpen = {
-                val json = assetText(ctx, "exams/${it.id}.json")
-                currentExam = parseExam(json)
-            }
-        )
-    } else {
-        // màn làm bài
-        ExamTakingScreen(
-            exam = currentExam!!,
-            onBack = { currentExam = null },
-            onSubmit = { answers ->
-                println("Kết quả: $answers")
-                currentExam = null
-            }
-        )
-    }
-}
-
-@Composable
 fun SetSystemBarsWhite() {
     val systemUiController = rememberSystemUiController()
 

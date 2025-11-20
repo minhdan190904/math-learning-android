@@ -5,8 +5,19 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -41,6 +52,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.trilogy.mathlearning.utils.UiState
 
+data class ExamTypeUi(
+    val examType: String,
+    val title: String,
+    val description: String
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterPickerScreen(
@@ -48,7 +65,7 @@ fun ChapterPickerScreen(
     vm: PracticeFlowViewModel,
     onStartPractice: (practiceId: String) -> Unit,
     onBack: () -> Unit,
-    onStartLoading: (Int, Int) -> Unit
+    onStartLoading: (Int, Int?, String?) -> Unit
 ) {
     val config by vm.configState.collectAsState()
 
@@ -96,6 +113,29 @@ fun ChapterPickerScreen(
                     ?.chapters
                     .orEmpty()
 
+                val examTypes = listOf(
+                    ExamTypeUi(
+                        examType = "midterm_1",
+                        title = "Giữa kì 1",
+                        description = "Luyện đề thi giữa học kì 1"
+                    ),
+                    ExamTypeUi(
+                        examType = "midterm_2",
+                        title = "Giữa kì 2",
+                        description = "Luyện đề thi giữa học kì 2"
+                    ),
+                    ExamTypeUi(
+                        examType = "final_1",
+                        title = "Cuối kì 1",
+                        description = "Luyện đề thi cuối học kì 1"
+                    ),
+                    ExamTypeUi(
+                        examType = "final_2",
+                        title = "Cuối kì 2",
+                        description = "Luyện đề thi cuối học kì 2"
+                    )
+                )
+
                 if (chapters.isEmpty()) {
                     Box(
                         modifier = Modifier
@@ -119,7 +159,25 @@ fun ChapterPickerScreen(
                                 index = index + 1,
                                 title = c.title,
                                 description = c.description.orEmpty(),
-                                onStart = { onStartLoading(grade, c.id) }
+                                onStart = { onStartLoading(grade, c.id, null) }
+                            )
+                        }
+
+                        item {
+                            Spacer(Modifier.height(24.dp))
+                            Text(
+                                text = "Luyện đề thi",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+                            )
+                        }
+
+                        items(examTypes) { exam ->
+                            ExamCard(
+                                title = exam.title,
+                                description = exam.description,
+                                onStart = { onStartLoading(grade, null, exam.examType) }
                             )
                         }
                     }
@@ -246,6 +304,142 @@ fun ChapterCard(
                         onClick = onStart,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = bluePrimary,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Bắt đầu")
+                            Spacer(Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExamCard(
+    title: String,
+    description: String,
+    onStart: () -> Unit
+) {
+    val primary = Color(0xFFEF6C00)
+    val light = Color(0xFFFFA726)
+
+    var pressed by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.97f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "examCardScale"
+    )
+
+    val borderGradient = Brush.horizontalGradient(
+        colors = listOf(
+            primary.copy(alpha = 0.8f),
+            light.copy(alpha = 0.8f)
+        )
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(
+                onClick = {
+                    pressed = true
+                    onStart()
+                    pressed = false
+                }
+            ),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(borderGradient)
+                .padding(1.dp)
+                .clip(MaterialTheme.shapes.large)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(horizontal = 20.dp, vertical = 18.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.small)
+                            .background(primary.copy(alpha = 0.08f))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "Đề thi",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    Spacer(Modifier.width(12.dp))
+
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                if (description.isNotBlank()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                Spacer(Modifier.height(14.dp))
+
+                Divider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                )
+
+                Spacer(Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = onStart,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = primary,
                             contentColor = Color.White
                         )
                     ) {

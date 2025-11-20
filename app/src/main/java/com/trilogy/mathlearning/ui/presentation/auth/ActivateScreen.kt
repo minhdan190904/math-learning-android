@@ -4,13 +4,36 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -24,7 +47,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.draw.alpha
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trilogy.mathlearning.R
@@ -45,7 +67,9 @@ fun ActivateScreen(
     val cardShape = RoundedCornerShape(22.dp)
 
     LaunchedEffect(ui) {
-        (ui as? UiState.Success<*>)?.data?.let { if (it is UserDto) onActivated() }
+        (ui as? UiState.Success<*>)?.data?.let {
+            if (it is UserDto) onActivated()
+        }
     }
 
     Box(
@@ -84,11 +108,10 @@ private fun ActivateContent(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    var code by remember { mutableStateOf("") } // 6 số
+    var code by remember { mutableStateOf("") }
     var seconds by remember { mutableIntStateOf(59) }
     var laidOut by remember { mutableStateOf(false) }
 
-    // Auto-focus + show keyboard khi đã layout
     LaunchedEffect(laidOut) {
         if (laidOut) {
             focusRequester.requestFocus()
@@ -96,7 +119,6 @@ private fun ActivateContent(
         }
     }
 
-    // Countdown 00:59
     LaunchedEffect(Unit) {
         while (seconds > 0) {
             delay(1000)
@@ -131,7 +153,7 @@ private fun ActivateContent(
 
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Verification Code",
+            text = "Mã xác thực",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF0D0D0D),
@@ -139,7 +161,7 @@ private fun ActivateContent(
         )
         Spacer(Modifier.height(6.dp))
         Text(
-            text = "Please confirm the security code received on your registered email.",
+            text = "Vui lòng nhập mã xác thực được gửi tới email của bạn.",
             color = Color(0xFF6B7280),
             fontSize = 13.sp,
             modifier = Modifier.fillMaxWidth()
@@ -152,24 +174,21 @@ private fun ActivateContent(
             onClick = {
                 if (laidOut) {
                     focusRequester.requestFocus()
-                    keyboardController?.show()   // <- đảm bảo mở lại bàn phím khi người dùng đã tắt
+                    keyboardController?.show()
                 }
             }
         )
 
-        // TextField ẩn để nhận số và cập nhật code
         TextField(
             value = code,
             onValueChange = {
                 val v = filtered(it)
                 code = v
                 if (v.length == 6) {
-                    // đủ 6 số thì ẩn keyboard (tuỳ luồng của bạn)
                     focusManager.clearFocus()
                 }
             },
             modifier = Modifier
-                // phải được "place": tránh size(0.dp)
                 .fillMaxWidth()
                 .height(1.dp)
                 .alpha(0f)
@@ -202,27 +221,30 @@ private fun ActivateContent(
                 .height(48.dp)
         ) {
             if (isLoading) {
-                CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(22.dp), color = Color.White)
+                CircularProgressIndicator(
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(22.dp),
+                    color = Color.White
+                )
             } else {
-                Text("Confirm", color = Color.White, fontSize = 16.sp)
+                Text("Xác nhận", color = Color.White, fontSize = 16.sp)
             }
         }
 
         Spacer(Modifier.height(14.dp))
         Text(
-            text = "Did not receive the code?",
+            text = "Không nhận được mã?",
             color = Color(0xFF70757A),
             fontSize = 13.sp
         )
         Text(
-            text = "Send Again",
+            text = "Gửi lại mã",
             color = primaryBlue,
             fontSize = 13.sp,
             modifier = Modifier.clickable {
                 if (seconds == 0) {
                     onResendClick?.invoke()
                     seconds = 59
-                    // gợi ý: tự động focus + show keyboard lại
                     focusRequester.requestFocus()
                     keyboardController?.show()
                 }
@@ -241,7 +263,7 @@ private fun OtpBoxes(
 ) {
     val boxShape = RoundedCornerShape(8.dp)
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         repeat(length) { index ->

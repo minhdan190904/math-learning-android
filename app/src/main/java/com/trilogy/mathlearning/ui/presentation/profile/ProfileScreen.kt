@@ -1,8 +1,19 @@
 package com.trilogy.mathlearning.ui.presentation.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -29,8 +40,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,12 +50,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.trilogy.mathlearning.ui.presentation.auth.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    viewModel: AuthViewModel = hiltViewModel(),
+    onBack: () -> Unit = {},
+    onLogoutSuccess: () -> Unit = {}
+) {
+    val cs = MaterialTheme.colorScheme
+
+    val user by viewModel.userInfo.collectAsState()
+    val logoutState by viewModel.logoutState.collectAsState()
+
     var darkMode by remember { mutableStateOf(false) }
     var notificationEnabled by remember { mutableStateOf(true) }
     var soundEnabled by remember { mutableStateOf(true) }
@@ -51,22 +77,52 @@ fun ProfileScreen() {
     var emailTipsEnabled by remember { mutableStateOf(true) }
     var useSystemTheme by remember { mutableStateOf(true) }
 
+    val displayName = user?.name
+        ?.takeIf { it.isNotBlank() }
+        ?: user?.email?.substringBefore("@")
+        ?: "Người dùng"
+
+    val displayEmail = user?.email ?: "email@example.com"
+
+    val initial = displayName.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
+
+    if (logoutState is com.trilogy.mathlearning.utils.UiState.Success) {
+        onLogoutSuccess()
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Cài đặt") },
+                title = {
+                    Text(
+                        "Cài đặt",
+                        color = cs.onPrimary
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, null)
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = null,
+                            tint = cs.onPrimary
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = { }) {
-                        Icon(Icons.Outlined.Settings, null)
+                        Icon(
+                            Icons.Outlined.Settings,
+                            contentDescription = null,
+                            tint = cs.onPrimary
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = cs.primary
+                )
             )
-        }
+        },
+        containerColor = cs.surface
     ) { inner ->
         LazyColumn(
             modifier = Modifier
@@ -83,20 +139,23 @@ fun ProfileScreen() {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .background(cs.primary.copy(alpha = 0.04f))
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(52.dp)
+                                .size(56.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                                .background(cs.secondary)
+                                .border(3.dp, Color(0xFFD0E4FF), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Person,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                            Text(
+                                text = initial,
+                                color = cs.onSecondary,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                         Spacer(Modifier.width(16.dp))
@@ -104,19 +163,22 @@ fun ProfileScreen() {
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Tên người dùng",
+                                text = displayName,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                text = "email@example.com",
+                                text = displayEmail,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = cs.onSurfaceVariant
                             )
                         }
                         TextButton(onClick = { }) {
-                            Text("Sửa")
+                            Text(
+                                "Sửa",
+                                color = cs.primary
+                            )
                         }
                     }
                 }
@@ -232,7 +294,9 @@ fun ProfileScreen() {
                 ElevatedCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { },
+                        .clickable {
+                            viewModel.logout()
+                        },
                     shape = MaterialTheme.shapes.large
                 ) {
                     Row(
@@ -245,13 +309,13 @@ fun ProfileScreen() {
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.08f)),
+                                .background(cs.error.copy(alpha = 0.08f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Logout,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
+                                tint = cs.error
                             )
                         }
                         Spacer(Modifier.width(12.dp))
@@ -261,14 +325,14 @@ fun ProfileScreen() {
                             Text(
                                 text = "Đăng xuất",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.error,
+                                color = cs.error,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
                                 text = "Thoát khỏi tài khoản hiện tại",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = cs.onSurfaceVariant
                             )
                         }
                     }
@@ -277,11 +341,11 @@ fun ProfileScreen() {
                 Text(
                     text = "MathLearning • 2025",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = cs.onSurfaceVariant,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.height(8.dp))
             }
@@ -291,11 +355,12 @@ fun ProfileScreen() {
 
 @Composable
 private fun SettingsSectionTitle(title: String) {
+    val cs = MaterialTheme.colorScheme
     Text(
         text = title,
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = cs.primary,
         modifier = Modifier
             .padding(top = 12.dp, bottom = 4.dp)
     )
@@ -308,6 +373,7 @@ private fun SettingsNavItem(
     subtitle: String,
     onClick: () -> Unit
 ) {
+    val cs = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -321,13 +387,13 @@ private fun SettingsNavItem(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)),
+                    .background(cs.primary.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = cs.primary
                 )
             }
             Spacer(Modifier.width(12.dp))
@@ -343,14 +409,14 @@ private fun SettingsNavItem(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = cs.onSurfaceVariant
                 )
             }
         }
         Spacer(Modifier.height(8.dp))
         Divider(
             thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            color = cs.outline.copy(alpha = 0.15f)
         )
     }
 }
@@ -364,6 +430,7 @@ private fun SettingsSwitchItem(
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val cs = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -376,13 +443,13 @@ private fun SettingsSwitchItem(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)),
+                    .background(cs.primary.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = cs.primary
                 )
             }
             Spacer(Modifier.width(12.dp))
@@ -398,7 +465,7 @@ private fun SettingsSwitchItem(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = cs.onSurfaceVariant
                 )
             }
             Spacer(Modifier.width(8.dp))
@@ -407,15 +474,15 @@ private fun SettingsSwitchItem(
                 onCheckedChange = onCheckedChange,
                 enabled = enabled,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primary
+                    checkedThumbColor = cs.onPrimary,
+                    checkedTrackColor = cs.primary
                 )
             )
         }
         Spacer(Modifier.height(8.dp))
         Divider(
             thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            color = cs.outline.copy(alpha = 0.15f)
         )
     }
 }

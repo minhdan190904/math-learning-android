@@ -4,7 +4,15 @@ import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,8 +20,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +56,7 @@ import com.trilogy.mathlearning.utils.UiState
 
 @Composable
 fun RegisterScreen(
-    onGoActivate: (email: String) -> Unit, // ⬅️ chuyển thẳng sang Activate với email vừa đăng ký
+    onGoActivate: (email: String) -> Unit,
     onSignInClick: (() -> Unit)? = null,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -42,7 +64,6 @@ fun RegisterScreen(
     val primaryBlue = Color(0xFF1677FF)
     val cardShape = RoundedCornerShape(22.dp)
 
-    // Khi register thành công -> chuyển sang Activate
     LaunchedEffect(ui) {
         (ui as? UiState.Success<*>)?.data?.let { data ->
             if (data is UserDto) {
@@ -69,7 +90,9 @@ fun RegisterScreen(
         ) {
             RegisterContent(
                 isLoading = ui is UiState.Loading,
-                onSubmit = { name, email, pass -> viewModel.register(email.trim(), pass, name.trim()) },
+                onSubmit = { name, email, pass ->
+                    viewModel.register(email.trim(), pass, name.trim())
+                },
                 onSignInClick = onSignInClick
             )
         }
@@ -92,13 +115,13 @@ private fun RegisterContent(
     var passErr by remember { mutableStateOf<String?>(null) }
 
     fun validate(): Boolean {
-        nameErr = if (name.isBlank()) "Please enter your name" else null
+        nameErr = if (name.isBlank()) "Vui lòng nhập họ và tên" else null
         emailErr = when {
-            email.isBlank() -> "Please enter email"
-            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Invalid email"
+            email.isBlank() -> "Vui lòng nhập email"
+            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Email không hợp lệ"
             else -> null
         }
-        passErr = if (pass.length < 6) "At least 6 characters" else null
+        passErr = if (pass.length < 6) "Mật khẩu phải có ít nhất 6 ký tự" else null
         return nameErr == null && emailErr == null && passErr == null
     }
 
@@ -120,7 +143,7 @@ private fun RegisterContent(
 
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Sign Up",
+            text = "Đăng ký tài khoản",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF0D0D0D),
@@ -130,10 +153,13 @@ private fun RegisterContent(
         )
 
         Spacer(Modifier.height(14.dp))
-        Label("NAME")
+        Label("HỌ VÀ TÊN")
         OutlinedTextField(
             value = name,
-            onValueChange = { name = it; nameErr = null },
+            onValueChange = {
+                name = it
+                nameErr = null
+            },
             singleLine = true,
             isError = nameErr != null,
             shape = RoundedCornerShape(8.dp),
@@ -146,10 +172,13 @@ private fun RegisterContent(
         ErrorHint(nameErr)
 
         Spacer(Modifier.height(12.dp))
-        Label("EMAIL ID")
+        Label("EMAIL")
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it; emailErr = null },
+            onValueChange = {
+                email = it
+                emailErr = null
+            },
             singleLine = true,
             isError = emailErr != null,
             shape = RoundedCornerShape(8.dp),
@@ -162,10 +191,13 @@ private fun RegisterContent(
         ErrorHint(emailErr)
 
         Spacer(Modifier.height(12.dp))
-        Label("PASSWORD")
+        Label("MẬT KHẨU")
         OutlinedTextField(
             value = pass,
-            onValueChange = { pass = it; passErr = null },
+            onValueChange = {
+                pass = it
+                passErr = null
+            },
             singleLine = true,
             isError = passErr != null,
             visualTransformation = if (showPass) VisualTransformation.None else PasswordVisualTransformation(),
@@ -173,7 +205,7 @@ private fun RegisterContent(
                 IconButton(onClick = { showPass = !showPass }) {
                     Icon(
                         if (showPass) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                        contentDescription = "Toggle password"
+                        contentDescription = null
                     )
                 }
             },
@@ -203,20 +235,20 @@ private fun RegisterContent(
                     color = Color.White
                 )
             } else {
-                Text("Create Account", color = Color.White, fontSize = 16.sp)
+                Text("Tạo tài khoản", color = Color.White, fontSize = 16.sp)
             }
         }
 
         Spacer(Modifier.height(14.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Already have an account?  ",
+                text = "Đã có tài khoản?  ",
                 fontSize = 13.sp,
                 color = Color(0xFF70757A),
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Sign In",
+                text = "Đăng nhập",
                 fontSize = 13.sp,
                 color = Color(0xFF1677FF),
                 modifier = Modifier.clickable { onSignInClick?.invoke() }

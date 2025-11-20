@@ -5,7 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trilogy.mathlearning.data.repository.AuthRepository
 import com.trilogy.mathlearning.data.repository.UserRepository
-import com.trilogy.mathlearning.domain.model.*
+import com.trilogy.mathlearning.domain.model.ActiveUserDto
+import com.trilogy.mathlearning.domain.model.LoginDto
+import com.trilogy.mathlearning.domain.model.RegisterDto
+import com.trilogy.mathlearning.domain.model.UserResDto
 import com.trilogy.mathlearning.utils.NetworkResource
 import com.trilogy.mathlearning.utils.UiState
 import com.trilogy.mathlearning.utils.myUser
@@ -31,6 +34,9 @@ class AuthViewModel @Inject constructor(
     private val _registerInfo = MutableStateFlow<LoginDto?>(null)
     val registerInfo: StateFlow<LoginDto?> = _registerInfo
 
+    private val _logoutState = MutableStateFlow<UiState<Unit>>(UiState.Empty)
+    val logoutState: StateFlow<UiState<Unit>> = _logoutState
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = UiState.Loading
@@ -52,9 +58,8 @@ class AuthViewModel @Inject constructor(
             _authState.value = UiState.Loading
             when (val res = authRepository.registerUser(RegisterDto(name = name, email = email, password = password))) {
                 is NetworkResource.Success -> {
-                    // Lưu lại email/password để dùng tiếp (nếu cần auto-fill)
                     _registerInfo.value = LoginDto(email = email, password = password)
-                    _authState.value = UiState.Success(res.data) // UserDto
+                    _authState.value = UiState.Success(res.data)
                 }
                 is NetworkResource.NetworkException -> _authState.value = UiState.Failure(res.message)
                 is NetworkResource.Error -> _authState.value = UiState.Failure(res.message)
@@ -67,7 +72,7 @@ class AuthViewModel @Inject constructor(
             _authState.value = UiState.Loading
             when (val res = authRepository.activateUser(ActiveUserDto(email = email, confirmCode = code))) {
                 is NetworkResource.Success -> {
-                    _authState.value = UiState.Success(res.data) // UserDto
+                    _authState.value = UiState.Success(res.data)
                 }
                 is NetworkResource.NetworkException -> _authState.value = UiState.Failure(res.message)
                 is NetworkResource.Error -> _authState.value = UiState.Failure(res.message)
@@ -79,19 +84,33 @@ class AuthViewModel @Inject constructor(
         _authState.value = UiState.Empty
     }
 
-    fun getUser(){
+    fun clearRegisterInfo() {
+        _registerInfo.value = null
+    }
+
+    fun getUser() {
         viewModelScope.launch {
-            when(val res = userRepository.getUser()){
+            when (val res = userRepository.getUser()) {
                 is NetworkResource.Success -> {
                     _userInfo.value = res.data
                     myUser = res.data
                     Log.d("getUser", res.data.toString())
                 }
                 is NetworkResource.NetworkException -> res.message?.let { Log.d("NetworkException", it) }
-
                 is NetworkResource.Error -> res.message?.let { Log.d("Error123", it) }
             }
         }
+    }
 
+    fun logout() {
+        viewModelScope.launch {
+            _logoutState.value = UiState.Loading
+            tokenApi = null
+            myUser = null
+            _userInfo.value = null
+            _registerInfo.value = null
+            _authState.value = UiState.Empty
+            _logoutState.value = UiState.Success(Unit)
+        }
     }
 }
