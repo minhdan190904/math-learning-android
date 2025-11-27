@@ -22,6 +22,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.trilogy.mathlearning.ui.presentation.camera.CropEditorScreen
+import com.trilogy.mathlearning.ui.presentation.camera.CroppedPreviewScreen
+import com.trilogy.mathlearning.ui.presentation.camera.EditorViewModel
+import com.trilogy.mathlearning.ui.presentation.camera.ScanCropScreen
 import com.trilogy.mathlearning.ui.presentation.community.CommunityScreen
 import com.trilogy.mathlearning.ui.presentation.community.QuestionDetailScreen
 import com.trilogy.mathlearning.ui.presentation.home.HomeScreen
@@ -37,6 +41,7 @@ import com.trilogy.mathlearning.ui.presentation.navigation.Screen
 import com.trilogy.mathlearning.ui.presentation.profile.ProfileScreen
 import com.trilogy.mathlearning.ui.presentation.solve_math.SolveHistoryDetailScreen
 import com.trilogy.mathlearning.ui.presentation.solve_math.SolveMathScreen
+import com.trilogy.mathlearning.ui.presentation.solve_math.TakeMathViewModel
 import com.trilogy.mathlearning.ui.presentation.statistic.LeaderboardScreen
 import com.trilogy.mathlearning.ui.presentation.statistic.StatisticViewModel
 
@@ -66,7 +71,7 @@ fun HomeRoot(
                     }
                 )
             }
-        },
+        }
     ) { inner ->
         NavHost(
             navController = navController,
@@ -108,7 +113,6 @@ fun HomeRoot(
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) { backStackEntry ->
                 val vm: StatisticViewModel = hiltViewModel(backStackEntry)
-
                 LeaderboardScreen(
                     vm = vm,
                     onBack = { navController.popBackStack() }
@@ -137,7 +141,6 @@ fun HomeRoot(
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getString("questionId") ?: return@composable
-
                 SolveHistoryDetailScreen(
                     questionId = id,
                     onBack = { navController.popBackStack() }
@@ -168,7 +171,6 @@ fun HomeRoot(
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
                 val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
-
                 PracticeHomeScreen(
                     vm = vm,
                     onPickGrade = { grade ->
@@ -191,7 +193,6 @@ fun HomeRoot(
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
                 val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
-
                 PracticeHistoryScreen(
                     vm = vm,
                     onBack = { navController.popBackStack() },
@@ -213,7 +214,6 @@ fun HomeRoot(
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
                 val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
-
                 val grade = backStackEntry.arguments?.getInt("grade") ?: return@composable
                 ChapterPickerScreen(
                     grade = grade,
@@ -245,7 +245,6 @@ fun HomeRoot(
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
                 val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
-
                 val g = backStackEntry.arguments?.getInt("grade") ?: return@composable
                 val c = backStackEntry.arguments?.getInt("chapterId") ?: return@composable
                 PracticeLoadingScreen(
@@ -277,7 +276,6 @@ fun HomeRoot(
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
                 val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
-
                 val g = backStackEntry.arguments?.getInt("grade") ?: return@composable
                 val examType = backStackEntry.arguments?.getString("examType") ?: return@composable
                 PracticeLoadingScreen(
@@ -306,7 +304,6 @@ fun HomeRoot(
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
                 val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
-
                 val pid = backStackEntry.arguments?.getString("practiceId") ?: return@composable
                 ExamHostScreen(
                     practiceId = pid,
@@ -332,7 +329,6 @@ fun HomeRoot(
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
                 val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
-
                 val pid = backStackEntry.arguments?.getString("practiceId") ?: return@composable
                 PracticeResultScreen(
                     vm = vm,
@@ -359,7 +355,6 @@ fun HomeRoot(
                     navController.getBackStackEntry(BottomDest.Practice.route)
                 }
                 val vm: PracticeFlowViewModel = hiltViewModel(parentEntry)
-
                 val pid = backStackEntry.arguments?.getString("practiceId") ?: return@composable
                 CheckResultScreen(
                     practiceId = pid,
@@ -379,7 +374,94 @@ fun HomeRoot(
                 val id = backStackEntry.arguments?.getString("postId") ?: return@composable
                 QuestionDetailScreen(
                     postId = id,
+                    navController = navController,
                     onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "answer_scan/{postId}",
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
+                val encoded = Uri.encode(postId)
+                val hostEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry("question/$encoded")
+                }
+                val vm: EditorViewModel = hiltViewModel(hostEntry)
+                ScanCropScreen { bmp, rect, origin ->
+                    vm.setInput(bmp, rect, origin)
+                    navController.navigate("answer_crop/$encoded")
+                }
+            }
+
+            composable(
+                route = "answer_crop/{postId}",
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
+                val encoded = Uri.encode(postId)
+                val hostEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry("question/$encoded")
+                }
+                val vm: EditorViewModel = hiltViewModel(hostEntry)
+                val bmp = vm.bmp ?: run {
+                    navController.popBackStack()
+                    return@composable
+                }
+                val rect = vm.rect ?: run {
+                    navController.popBackStack()
+                    return@composable
+                }
+                val origin = vm.origin ?: run {
+                    navController.popBackStack()
+                    return@composable
+                }
+                CropEditorScreen(
+                    bitmap = bmp,
+                    initialRect = rect,
+                    origin = origin,
+                    onDone = { cropped ->
+                        vm.setCropped(cropped)
+                        navController.navigate("answer_preview/$encoded")
+                    },
+                    onCancel = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "answer_preview/{postId}",
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
+                val encoded = Uri.encode(postId)
+                val hostEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry("question/$encoded")
+                }
+                val vmEditor: EditorViewModel = hiltViewModel(hostEntry)
+                val hostVm: TakeMathViewModel = hiltViewModel(hostEntry)
+                val cropped = vmEditor.cropped ?: run {
+                    navController.popBackStack()
+                    return@composable
+                }
+                CroppedPreviewScreen(
+                    image = cropped,
+                    onClose = {
+                        hostVm.replaceWithAndUpload(cropped)
+                        navController.popBackStack("answer_scan/$encoded", inclusive = true)
+                    }
                 )
             }
         }

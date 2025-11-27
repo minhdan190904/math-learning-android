@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.trilogy.mathlearning.ui.presentation.auth.AuthViewModel
+import com.trilogy.mathlearning.utils.myUser
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,8 +67,6 @@ fun ProfileScreen(
     onLogoutSuccess: () -> Unit = {}
 ) {
     val cs = MaterialTheme.colorScheme
-
-    val user by viewModel.userInfo.collectAsState()
     val logoutState by viewModel.logoutState.collectAsState()
 
     var darkMode by remember { mutableStateOf(false) }
@@ -77,13 +76,12 @@ fun ProfileScreen(
     var emailTipsEnabled by remember { mutableStateOf(true) }
     var useSystemTheme by remember { mutableStateOf(true) }
 
+    val user = myUser
     val displayName = user?.name
         ?.takeIf { it.isNotBlank() }
         ?: user?.email?.substringBefore("@")
         ?: "Người dùng"
-
     val displayEmail = user?.email ?: "email@example.com"
-
     val initial = displayName.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
 
     if (logoutState is com.trilogy.mathlearning.utils.UiState.Success) {

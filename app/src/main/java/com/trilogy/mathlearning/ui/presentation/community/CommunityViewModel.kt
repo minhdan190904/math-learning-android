@@ -17,7 +17,6 @@ class CommunityViewModel @Inject constructor(
     private val repo: CommunityRepository
 ) : ViewModel() {
 
-    /* ---------- TẠO QUESTION ---------- */
     private val _postState = MutableStateFlow<UiState<QuestionResDto>>(UiState.Empty)
     val postState: StateFlow<UiState<QuestionResDto>> = _postState
 
@@ -35,9 +34,11 @@ class CommunityViewModel @Inject constructor(
             }
         }
     }
-    fun resetPostState() { _postState.value = UiState.Empty }
 
-    /* ---------- LIST QUESTIONS ---------- */
+    fun resetPostState() {
+        _postState.value = UiState.Empty
+    }
+
     private val _questionsState = MutableStateFlow<UiState<List<QuestionResDto>>>(UiState.Empty)
     val questionsState: StateFlow<UiState<List<QuestionResDto>>> = _questionsState
 
@@ -50,8 +51,20 @@ class CommunityViewModel @Inject constructor(
         }
     }
 
+    fun loadQuestionsWithoutAI() = viewModelScope.launch {
+        _questionsState.value = UiState.Loading
+        when (val res = repo.loadQuestions()) {
+            is NetworkResource.Success -> {
+                val filtered = res.data.filter { q ->
+                    q.answers.none { it.isAI }
+                }
+                _questionsState.value = UiState.Success(filtered)
+            }
+            is NetworkResource.Error -> _questionsState.value = UiState.Failure(res.message)
+            is NetworkResource.NetworkException -> _questionsState.value = UiState.Failure(res.message)
+        }
+    }
 
-    /* ---------- QUESTION DETAIL ---------- */
     private val _detailState = MutableStateFlow<UiState<QuestionResDto>>(UiState.Empty)
     val detailState: StateFlow<UiState<QuestionResDto>> = _detailState
 
@@ -66,7 +79,7 @@ class CommunityViewModel @Inject constructor(
 
     fun createAnswer(questionId: String, content: String?, imageUrl: String?) = viewModelScope.launch {
         when (repo.createAnswer(questionId, content, imageUrl)) {
-            is NetworkResource.Success -> loadQuestionDetail(questionId) // gửi xong reload detail
+            is NetworkResource.Success -> loadQuestionDetail(questionId)
             else -> {}
         }
     }
@@ -79,10 +92,7 @@ class CommunityViewModel @Inject constructor(
             }
         }
 
-    fun toggleLike(answerId: String, questionId: String) = viewModelScope.launch {
-        when (repo.toggleLike(answerId)) {
-            is NetworkResource.Success -> loadQuestionDetail(questionId) // like/unlike xong reload
-            else -> {}
-        }
+    fun toggleLike(answerId: String) = viewModelScope.launch {
+        repo.toggleLike(answerId)
     }
 }

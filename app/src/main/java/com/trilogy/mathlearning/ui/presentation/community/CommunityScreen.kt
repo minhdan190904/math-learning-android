@@ -80,7 +80,7 @@ fun CommunityScreen(
     val vm: CommunityViewModel = hiltViewModel()
     val state by vm.questionsState.collectAsState()
 
-    LaunchedEffect(Unit) { vm.loadQuestions() }
+    LaunchedEffect(Unit) { vm.loadQuestionsWithoutAI() }
 
     Scaffold(
         topBar = {
