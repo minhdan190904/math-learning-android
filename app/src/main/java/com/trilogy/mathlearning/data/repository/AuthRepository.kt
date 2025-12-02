@@ -53,7 +53,8 @@ class AuthRepository @Inject constructor(
             call = { authApi.login(loginDto) },
             customErrorMessages = commonErrors + mapOf(
                 403 to "Tài khoản chưa kích hoạt. Vui lòng kiểm tra email.",
-                423 to "Tài khoản đang bị khoá tạm thời"
+                423 to "Tài khoản đang bị khoá tạm thời",
+                400 to "Tài khoản hoặc mật khẩu không đúng"
             )
         )
     }

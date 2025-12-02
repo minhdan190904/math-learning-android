@@ -85,8 +85,34 @@ fun HomeRoot(
                 popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) {
-                HomeScreen()
+                HomeScreen(
+                    onOpenSolveMath = {
+                        navController.navigate(BottomDest.SolveMath.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onOpenPractice = {
+                        navController.navigate(BottomDest.Practice.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onOpenCommunity = {
+                        navController.navigate(BottomDest.Community.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onOpenLeaderboard = {
+                        navController.navigate("stats/leaderboard")
+                    }
+                )
             }
+
 
             composable(
                 route = BottomDest.Community.route,

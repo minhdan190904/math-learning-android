@@ -12,8 +12,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.trilogy.mathlearning.ui.presentation.auth.ActivateScreen
+import com.trilogy.mathlearning.ui.presentation.auth.ForgotPasswordScreen
 import com.trilogy.mathlearning.ui.presentation.auth.LoginScreen
 import com.trilogy.mathlearning.ui.presentation.auth.RegisterScreen
+import com.trilogy.mathlearning.ui.presentation.auth.ResetPasswordScreen
 import com.trilogy.mathlearning.ui.presentation.bottom_navigation.HomeRoot
 import com.trilogy.mathlearning.ui.presentation.camera.CropEditorScreen
 import com.trilogy.mathlearning.ui.presentation.camera.CroppedPreviewScreen
@@ -117,6 +119,46 @@ fun AppNavigation(startDestination: String) {
             }
 
             composable(
+                route = Screen.ResetPassword.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) {
+                ResetPasswordScreen(
+                    onBackToLogin = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.ResetPassword.route) { inclusive = true }
+                        }
+                    },
+                    onResetSuccess = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.ResetPassword.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+
+            composable(
+                route = Screen.ForgotPassword.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) {
+                ForgotPasswordScreen(
+                    onBackToLogin = {
+                        navController.popBackStack()
+                    },
+                    onOpenResetPassword = {
+                        navController.navigate(Screen.ResetPassword.route)
+                    }
+                )
+            }
+
+
+            composable(
                 route = Screen.CroppedPreview.route,
                 enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
@@ -200,9 +242,13 @@ fun AppNavigation(startDestination: String) {
                 },
                 onSignUpClick = {
                     navController.navigate(Screen.Register.route)
+                },
+                onForgotPasswordClick = {
+                    navController.navigate(Screen.ForgotPassword.route)
                 }
             )
         }
+
 
         composable(
             route = Screen.TakeMathImage.route,

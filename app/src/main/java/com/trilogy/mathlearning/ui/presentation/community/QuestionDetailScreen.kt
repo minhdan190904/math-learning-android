@@ -67,6 +67,7 @@ import com.google.accompanist.placeholder.shimmer
 import com.trilogy.mathlearning.domain.model.QuestionResDto
 import com.trilogy.mathlearning.ui.presentation.solve_math.TakeMathViewModel
 import com.trilogy.mathlearning.utils.UiState
+import com.trilogy.mathlearning.utils.myUser
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,7 +136,11 @@ fun QuestionDetailScreen(
 }
 
 @Composable
-private fun DetailContent(inner: PaddingValues, post: QuestionResDto, onToggleLike: (String) -> Unit) {
+private fun DetailContent(
+    inner: PaddingValues,
+    post: QuestionResDto,
+    onToggleLike: (String) -> Unit
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -182,7 +187,11 @@ private fun DetailContent(inner: PaddingValues, post: QuestionResDto, onToggleLi
             val name = a.authorName.ifBlank { a.authorEmail.substringBefore("@") }
             val initial = name.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
             val cs = MaterialTheme.colorScheme
-            var liked by remember(a.id) { mutableStateOf(false) }
+
+            val currentUserId = myUser?.id ?: myUser?.email
+            val initialLiked = currentUserId != null && a.likedBy.contains(currentUserId)
+
+            var liked by remember(a.id) { mutableStateOf(initialLiked) }
             var likes by remember(a.id) { mutableIntStateOf(a.likes) }
 
             Column(
@@ -226,14 +235,12 @@ private fun DetailContent(inner: PaddingValues, post: QuestionResDto, onToggleLi
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconToggleButton(
                         checked = liked,
-                        onCheckedChange = {
-                            liked = !liked
-                            if (liked) {
-                                likes += 1
-                            } else {
-                                likes = (likes - 1).coerceAtLeast(0)
+                        onCheckedChange = { isChecked ->
+                            if (isChecked != liked) {
+                                liked = isChecked
+                                likes = if (liked) likes + 1 else (likes - 1).coerceAtLeast(0)
+                                onToggleLike(a.id)
                             }
-                            onToggleLike(a.id)
                         }
                     ) {
                         Icon(

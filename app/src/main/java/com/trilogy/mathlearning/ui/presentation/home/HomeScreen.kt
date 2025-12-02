@@ -1,6 +1,7 @@
 package com.trilogy.mathlearning.ui.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +36,12 @@ import androidx.compose.ui.unit.sp
 import com.trilogy.mathlearning.utils.myUser
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onOpenSolveMath: () -> Unit = {},
+    onOpenPractice: () -> Unit = {},
+    onOpenCommunity: () -> Unit = {},
+    onOpenLeaderboard: () -> Unit = {}
+) {
     val cs = MaterialTheme.colorScheme
     val user = myUser
 
@@ -95,6 +101,7 @@ fun HomeScreen() {
                     subtitle = "Chụp bài, nhận lời giải chi tiết",
                     icon = Icons.Filled.Calculate,
                     tint = Color(0xFF1677FF),
+                    onClick = onOpenSolveMath,
                     modifier = Modifier.weight(1f)
                 )
                 HomeQuickCard(
@@ -102,6 +109,7 @@ fun HomeScreen() {
                     subtitle = "Chọn khối & chương",
                     icon = Icons.Filled.AutoGraph,
                     tint = Color(0xFF00A86B),
+                    onClick = onOpenPractice,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -115,6 +123,7 @@ fun HomeScreen() {
                     subtitle = "Xem bài và hỏi đáp",
                     icon = Icons.Filled.Groups,
                     tint = Color(0xFFFB8C00),
+                    onClick = onOpenCommunity,
                     modifier = Modifier.weight(1f)
                 )
                 HomeQuickCard(
@@ -122,6 +131,7 @@ fun HomeScreen() {
                     subtitle = "Xem thứ hạng của bạn",
                     icon = Icons.Filled.Star,
                     tint = Color(0xFFFFC107),
+                    onClick = onOpenLeaderboard,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -162,11 +172,12 @@ private fun HomeQuickCard(
     subtitle: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     tint: Color,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val cs = MaterialTheme.colorScheme
     Card(
-        modifier = modifier,
+        modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = cs.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)

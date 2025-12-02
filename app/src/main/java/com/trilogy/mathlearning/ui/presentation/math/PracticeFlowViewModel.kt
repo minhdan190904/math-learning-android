@@ -48,7 +48,6 @@ class PracticeFlowViewModel @Inject constructor(
 
     val selectedAnswers = mutableMapOf<String, Int>()
     var timeSpentSec: Int = 0
-        private set
     private var timerJob: Job? = null
 
     fun loadConfig() = viewModelScope.launch {

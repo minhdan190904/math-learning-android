@@ -6,8 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.trilogy.mathlearning.data.repository.AuthRepository
 import com.trilogy.mathlearning.data.repository.UserRepository
 import com.trilogy.mathlearning.domain.model.ActiveUserDto
+import com.trilogy.mathlearning.domain.model.ForgotPasswordDto
 import com.trilogy.mathlearning.domain.model.LoginDto
 import com.trilogy.mathlearning.domain.model.RegisterDto
+import com.trilogy.mathlearning.domain.model.ResetPasswordDto
+import com.trilogy.mathlearning.domain.model.ResDto
 import com.trilogy.mathlearning.domain.model.UserResDto
 import com.trilogy.mathlearning.utils.NetworkResource
 import com.trilogy.mathlearning.utils.UiState
@@ -36,6 +39,12 @@ class AuthViewModel @Inject constructor(
 
     private val _logoutState = MutableStateFlow<UiState<Unit>>(UiState.Empty)
     val logoutState: StateFlow<UiState<Unit>> = _logoutState
+
+    private val _forgotPasswordState = MutableStateFlow<UiState<ResDto>>(UiState.Empty)
+    val forgotPasswordState: StateFlow<UiState<ResDto>> = _forgotPasswordState
+
+    private val _resetPasswordState = MutableStateFlow<UiState<ResDto>>(UiState.Empty)
+    val resetPasswordState: StateFlow<UiState<ResDto>> = _resetPasswordState
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
@@ -80,12 +89,47 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun forgotPassword(email: String) {
+        viewModelScope.launch {
+            _forgotPasswordState.value = UiState.Loading
+            when (val res = authRepository.forgotPassword(ForgotPasswordDto(email))) {
+                is NetworkResource.Success -> _forgotPasswordState.value = UiState.Success(res.data)
+                is NetworkResource.NetworkException -> _forgotPasswordState.value = UiState.Failure(res.message)
+                is NetworkResource.Error -> _forgotPasswordState.value = UiState.Failure(res.message)
+            }
+        }
+    }
+
+    fun resetPassword(code: String, newPassword: String, confirmNewPassword: String) {
+        viewModelScope.launch {
+            _resetPasswordState.value = UiState.Loading
+            val dto = ResetPasswordDto(
+                newPassword = newPassword,
+                confirmNewPassword = confirmNewPassword,
+                forgotPasswordCode = code
+            )
+            when (val res = authRepository.resetPassword(dto)) {
+                is NetworkResource.Success -> _resetPasswordState.value = UiState.Success(res.data)
+                is NetworkResource.NetworkException -> _resetPasswordState.value = UiState.Failure(res.message)
+                is NetworkResource.Error -> _resetPasswordState.value = UiState.Failure(res.message)
+            }
+        }
+    }
+
     fun clearAuthState() {
         _authState.value = UiState.Empty
     }
 
     fun clearRegisterInfo() {
         _registerInfo.value = null
+    }
+
+    fun clearForgotPasswordState() {
+        _forgotPasswordState.value = UiState.Empty
+    }
+
+    fun clearResetPasswordState() {
+        _resetPasswordState.value = UiState.Empty
     }
 
     fun getUser() {
@@ -110,6 +154,8 @@ class AuthViewModel @Inject constructor(
             _userInfo.value = null
             _registerInfo.value = null
             _authState.value = UiState.Empty
+            _forgotPasswordState.value = UiState.Empty
+            _resetPasswordState.value = UiState.Empty
             _logoutState.value = UiState.Success(Unit)
         }
     }

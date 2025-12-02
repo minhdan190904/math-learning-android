@@ -257,29 +257,3 @@ private fun RegisterContent(
         Spacer(Modifier.height(8.dp))
     }
 }
-
-@Composable
-private fun Label(text: String) {
-    Text(
-        text = text,
-        fontSize = 12.sp,
-        color = Color(0xFF6B7280),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 6.dp, start = 2.dp)
-    )
-}
-
-@Composable
-private fun ErrorHint(msg: String?) {
-    if (msg != null) {
-        Text(
-            text = msg,
-            color = MaterialTheme.colorScheme.error,
-            fontSize = 12.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, start = 2.dp)
-        )
-    }
-}

@@ -26,7 +26,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -54,6 +53,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trilogy.mathlearning.R
 import com.trilogy.mathlearning.domain.model.LoginResDto
+import com.trilogy.mathlearning.domain.model.ResDto
 import com.trilogy.mathlearning.utils.UiState
 
 @Composable
@@ -98,7 +98,7 @@ fun LoginScreen(
 }
 
 @Composable
-private fun ContentBlock(
+fun ContentBlock(
     isLoading: Boolean,
     onSubmit: (String, String) -> Unit,
     onSignUpClick: (() -> Unit)?,
@@ -263,7 +263,7 @@ private fun ContentBlock(
 }
 
 @Composable
-private fun Label(text: String) {
+fun Label(text: String) {
     Text(
         text = text,
         fontSize = 12.sp,
@@ -275,7 +275,7 @@ private fun Label(text: String) {
 }
 
 @Composable
-private fun ErrorHint(msg: String?) {
+fun ErrorHint(msg: String?) {
     if (msg != null) {
         Text(
             text = msg,
