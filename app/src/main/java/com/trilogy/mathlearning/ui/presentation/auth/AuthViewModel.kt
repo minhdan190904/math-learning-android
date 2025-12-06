@@ -52,12 +52,20 @@ class AuthViewModel @Inject constructor(
             when (val res = authRepository.login(LoginDto(email = email, password = password))) {
                 is NetworkResource.Success -> {
                     tokenApi = res.data.accessToken
-                    Log.i("DanMinh123", tokenApi!!)
+                    Log.i("DanMinh123", tokenApi ?: "")
                     getUser()
                     _authState.value = UiState.Success(res.data)
                 }
-                is NetworkResource.NetworkException -> _authState.value = UiState.Failure(res.message)
-                is NetworkResource.Error -> _authState.value = UiState.Failure(res.message)
+                is NetworkResource.NetworkException -> {
+                    _authState.value = UiState.Failure(
+                        res.message ?: "Không thể kết nối tới máy chủ. Vui lòng thử lại."
+                    )
+                }
+                is NetworkResource.Error -> {
+                    _authState.value = UiState.Failure(
+                        res.message ?: "Đăng nhập thất bại. Vui lòng thử lại."
+                    )
+                }
             }
         }
     }
@@ -70,8 +78,16 @@ class AuthViewModel @Inject constructor(
                     _registerInfo.value = LoginDto(email = email, password = password)
                     _authState.value = UiState.Success(res.data)
                 }
-                is NetworkResource.NetworkException -> _authState.value = UiState.Failure(res.message)
-                is NetworkResource.Error -> _authState.value = UiState.Failure(res.message)
+                is NetworkResource.NetworkException -> {
+                    _authState.value = UiState.Failure(
+                        res.message ?: "Không thể kết nối tới máy chủ. Vui lòng thử lại."
+                    )
+                }
+                is NetworkResource.Error -> {
+                    _authState.value = UiState.Failure(
+                        res.message ?: "Đăng ký thất bại. Vui lòng thử lại."
+                    )
+                }
             }
         }
     }
@@ -83,8 +99,16 @@ class AuthViewModel @Inject constructor(
                 is NetworkResource.Success -> {
                     _authState.value = UiState.Success(res.data)
                 }
-                is NetworkResource.NetworkException -> _authState.value = UiState.Failure(res.message)
-                is NetworkResource.Error -> _authState.value = UiState.Failure(res.message)
+                is NetworkResource.NetworkException -> {
+                    _authState.value = UiState.Failure(
+                        res.message ?: "Không thể kết nối tới máy chủ. Vui lòng thử lại."
+                    )
+                }
+                is NetworkResource.Error -> {
+                    _authState.value = UiState.Failure(
+                        res.message ?: "Kích hoạt tài khoản thất bại. Vui lòng thử lại."
+                    )
+                }
             }
         }
     }
@@ -93,9 +117,19 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _forgotPasswordState.value = UiState.Loading
             when (val res = authRepository.forgotPassword(ForgotPasswordDto(email))) {
-                is NetworkResource.Success -> _forgotPasswordState.value = UiState.Success(res.data)
-                is NetworkResource.NetworkException -> _forgotPasswordState.value = UiState.Failure(res.message)
-                is NetworkResource.Error -> _forgotPasswordState.value = UiState.Failure(res.message)
+                is NetworkResource.Success -> {
+                    _forgotPasswordState.value = UiState.Success(res.data)
+                }
+                is NetworkResource.NetworkException -> {
+                    _forgotPasswordState.value = UiState.Failure(
+                        res.message ?: "Không thể kết nối tới máy chủ. Vui lòng thử lại."
+                    )
+                }
+                is NetworkResource.Error -> {
+                    _forgotPasswordState.value = UiState.Failure(
+                        res.message ?: "Gửi mã đặt lại mật khẩu thất bại. Vui lòng thử lại."
+                    )
+                }
             }
         }
     }
@@ -109,9 +143,19 @@ class AuthViewModel @Inject constructor(
                 forgotPasswordCode = code
             )
             when (val res = authRepository.resetPassword(dto)) {
-                is NetworkResource.Success -> _resetPasswordState.value = UiState.Success(res.data)
-                is NetworkResource.NetworkException -> _resetPasswordState.value = UiState.Failure(res.message)
-                is NetworkResource.Error -> _resetPasswordState.value = UiState.Failure(res.message)
+                is NetworkResource.Success -> {
+                    _resetPasswordState.value = UiState.Success(res.data)
+                }
+                is NetworkResource.NetworkException -> {
+                    _resetPasswordState.value = UiState.Failure(
+                        res.message ?: "Không thể kết nối tới máy chủ. Vui lòng thử lại."
+                    )
+                }
+                is NetworkResource.Error -> {
+                    _resetPasswordState.value = UiState.Failure(
+                        res.message ?: "Đặt lại mật khẩu thất bại. Vui lòng thử lại."
+                    )
+                }
             }
         }
     }
@@ -140,8 +184,12 @@ class AuthViewModel @Inject constructor(
                     myUser = res.data
                     Log.d("getUser", res.data.toString())
                 }
-                is NetworkResource.NetworkException -> res.message?.let { Log.d("NetworkException", it) }
-                is NetworkResource.Error -> res.message?.let { Log.d("Error123", it) }
+                is NetworkResource.NetworkException -> {
+                    res.message?.let { Log.d("NetworkException", it) }
+                }
+                is NetworkResource.Error -> {
+                    res.message?.let { Log.d("Error123", it) }
+                }
             }
         }
     }

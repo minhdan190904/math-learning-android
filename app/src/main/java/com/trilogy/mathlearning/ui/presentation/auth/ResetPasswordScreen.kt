@@ -54,6 +54,7 @@ import com.trilogy.mathlearning.utils.UiState
 
 @Composable
 fun ResetPasswordScreen(
+    code: String,                          // ✅ nhận từ Nav
     onBackToLogin: () -> Unit,
     onResetSuccess: (() -> Unit)? = null,
     viewModel: AuthViewModel = hiltViewModel()
@@ -62,10 +63,8 @@ fun ResetPasswordScreen(
     val primaryBlue = Color(0xFF1677FF)
     val cardShape = RoundedCornerShape(22.dp)
 
-    var code by remember { mutableStateOf("") }
     var newPass by remember { mutableStateOf("") }
     var confirmPass by remember { mutableStateOf("") }
-    var codeErr by remember { mutableStateOf<String?>(null) }
     var newPassErr by remember { mutableStateOf<String?>(null) }
     var confirmPassErr by remember { mutableStateOf<String?>(null) }
     var showNewPass by remember { mutableStateOf(false) }
@@ -84,14 +83,13 @@ fun ResetPasswordScreen(
     }
 
     fun validate(): Boolean {
-        codeErr = if (code.isBlank()) "Vui lòng nhập mã xác nhận" else null
         newPassErr = if (newPass.length < 6) "Mật khẩu phải có ít nhất 6 ký tự" else null
         confirmPassErr = when {
             confirmPass.isBlank() -> "Vui lòng nhập lại mật khẩu"
             confirmPass != newPass -> "Mật khẩu nhập lại không khớp"
             else -> null
         }
-        return codeErr == null && newPassErr == null && confirmPassErr == null
+        return newPassErr == null && confirmPassErr == null
     }
 
     Box(
@@ -135,33 +133,15 @@ fun ResetPasswordScreen(
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Nhập mã xác nhận và mật khẩu mới của bạn.",
+                    text = "Nhập mật khẩu mới của bạn.",
                     fontSize = 13.sp,
                     color = Color(0xFF70757A),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 6.dp, end = 6.dp)
                 )
+
                 Spacer(Modifier.height(14.dp))
-                Label("MÃ XÁC NHẬN")
-                OutlinedTextField(
-                    value = code,
-                    onValueChange = {
-                        code = it
-                        codeErr = null
-                    },
-                    singleLine = true,
-                    isError = codeErr != null,
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    )
-                )
-                ErrorHint(codeErr)
-                Spacer(Modifier.height(12.dp))
                 Label("MẬT KHẨU MỚI")
                 OutlinedTextField(
                     value = newPass,
@@ -190,6 +170,7 @@ fun ResetPasswordScreen(
                 )
                 ErrorHint(newPassErr)
                 Spacer(Modifier.height(12.dp))
+
                 Label("XÁC NHẬN MẬT KHẨU")
                 OutlinedTextField(
                     value = confirmPass,
@@ -217,12 +198,13 @@ fun ResetPasswordScreen(
                     )
                 )
                 ErrorHint(confirmPassErr)
+
                 Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
                         if (validate()) {
                             viewModel.resetPassword(
-                                code.trim(),
+                                code.trim(),      // ✅ dùng code từ Nav
                                 newPass,
                                 confirmPass
                             )
@@ -245,6 +227,7 @@ fun ResetPasswordScreen(
                         Text("Xác nhận", color = Color.White, fontSize = 16.sp)
                     }
                 }
+
                 if (!successMessage.isNullOrBlank()) {
                     Spacer(Modifier.height(8.dp))
                     Text(
@@ -267,6 +250,7 @@ fun ResetPasswordScreen(
                             .padding(horizontal = 4.dp)
                     )
                 }
+
                 Spacer(Modifier.height(18.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically

@@ -124,7 +124,7 @@ fun PracticeResultScreen(
                             Text("Đang tải kết quả...", style = MaterialTheme.typography.bodyLarge, color = Color(0xFF0A3D91))
                         }
                     } else {
-                        val scoreDisplay = res.score
+                        val scoreDisplay = String.format("%.1f", res.correctAnswers.toFloat() / res.totalAnswers * 10.0f)
                         Text(
                             "Điểm: $scoreDisplay/10",
                             style = MaterialTheme.typography.headlineSmall,

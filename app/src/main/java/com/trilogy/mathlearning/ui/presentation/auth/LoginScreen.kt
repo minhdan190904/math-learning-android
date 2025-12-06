@@ -26,11 +26,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,7 +53,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trilogy.mathlearning.R
 import com.trilogy.mathlearning.domain.model.LoginResDto
-import com.trilogy.mathlearning.domain.model.ResDto
 import com.trilogy.mathlearning.utils.UiState
 
 @Composable
@@ -66,6 +65,13 @@ fun LoginScreen(
     val ui by viewModel.authState.collectAsStateWithLifecycle()
     val primaryBlue = Color(0xFF1677FF)
     val cardShape = RoundedCornerShape(22.dp)
+
+    val isLoading = ui is UiState.Loading
+    val errorMessage = (ui as? UiState.Failure)?.error
+
+    LaunchedEffect(Unit) {
+        viewModel.clearAuthState()
+    }
 
     LaunchedEffect(ui) {
         (ui as? UiState.Success<*>)?.data?.let {
@@ -88,7 +94,8 @@ fun LoginScreen(
                 .fillMaxWidth()
         ) {
             ContentBlock(
-                isLoading = ui is UiState.Loading,
+                isLoading = isLoading,
+                errorMessage = errorMessage,
                 onSubmit = { email, pass -> viewModel.login(email, pass) },
                 onSignUpClick = onSignUpClick,
                 onForgotPasswordClick = onForgotPasswordClick
@@ -100,6 +107,7 @@ fun LoginScreen(
 @Composable
 fun ContentBlock(
     isLoading: Boolean,
+    errorMessage: String?,
     onSubmit: (String, String) -> Unit,
     onSignUpClick: (() -> Unit)?,
     onForgotPasswordClick: (() -> Unit)?
@@ -226,6 +234,18 @@ fun ContentBlock(
             } else {
                 Text("Đăng nhập", color = Color.White, fontSize = 16.sp)
             }
+        }
+
+        if (!errorMessage.isNullOrBlank()) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
+            )
         }
 
         Spacer(Modifier.height(18.dp))

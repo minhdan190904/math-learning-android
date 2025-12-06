@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.trilogy.mathlearning.ui.presentation.auth.ActivateScreen
+import com.trilogy.mathlearning.ui.presentation.auth.ForgotCodeScreen
 import com.trilogy.mathlearning.ui.presentation.auth.ForgotPasswordScreen
 import com.trilogy.mathlearning.ui.presentation.auth.LoginScreen
 import com.trilogy.mathlearning.ui.presentation.auth.RegisterScreen
@@ -43,6 +44,23 @@ fun AppNavigation(startDestination: String) {
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
         ) {
             WelcomeScreen(navController = navController)
+        }
+
+        composable(
+            route = Screen.ForgotCode.route + "/{email}",
+            enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            ForgotCodeScreen(
+                email = email,
+                onCodeConfirmed = { code ->
+                    navController.navigate(Screen.ResetPassword.route + "/$code")
+                },
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(
@@ -119,26 +137,27 @@ fun AppNavigation(startDestination: String) {
             }
 
             composable(
-                route = Screen.ResetPassword.route,
+                route = Screen.ResetPassword.route + "/{code}",
                 enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
                 popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
-            ) {
+            ) { backStackEntry ->
+                val code = backStackEntry.arguments?.getString("code") ?: ""
                 ResetPasswordScreen(
+                    code = code,
                     onBackToLogin = {
                         navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.ResetPassword.route) { inclusive = true }
+                            popUpTo(Screen.ResetPassword.route + "/{code}") { inclusive = true }
                         }
                     },
                     onResetSuccess = {
                         navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.ResetPassword.route) { inclusive = true }
+                            popUpTo(Screen.ResetPassword.route + "/{code}") { inclusive = true }
                         }
                     }
                 )
             }
-
 
             composable(
                 route = Screen.ForgotPassword.route,
@@ -148,11 +167,24 @@ fun AppNavigation(startDestination: String) {
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
             ) {
                 ForgotPasswordScreen(
-                    onBackToLogin = {
-                        navController.popBackStack()
-                    },
-                    onOpenResetPassword = {
-                        navController.navigate(Screen.ResetPassword.route)
+                    onBackToLogin = { navController.popBackStack() },
+                    onOpenCodeScreen = { email ->
+                        navController.navigate(Screen.ForgotCode.route + "/$email")
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.ForgotPassword.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
+            ) {
+                ForgotPasswordScreen(
+                    onBackToLogin = { navController.popBackStack() },
+                    onOpenCodeScreen = { email ->
+                        navController.navigate(Screen.ForgotCode.route + "/$email")
                     }
                 )
             }

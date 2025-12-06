@@ -50,7 +50,7 @@ import com.trilogy.mathlearning.utils.UiState
 @Composable
 fun ForgotPasswordScreen(
     onBackToLogin: () -> Unit,
-    onOpenResetPassword: (() -> Unit)? = null,
+    onOpenCodeScreen: (String) -> Unit,      // 🔁 đổi tên + kiểu
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val ui by viewModel.forgotPasswordState.collectAsStateWithLifecycle()
@@ -61,10 +61,18 @@ fun ForgotPasswordScreen(
     var emailErr by remember { mutableStateOf<String?>(null) }
 
     val isLoading = ui is UiState.Loading
-    val successMessage = (ui as? UiState.Success<ResDto>)?.data?.message
+    val success = ui as? UiState.Success<ResDto>
     val errorMessage = (ui as? UiState.Failure)?.error
 
     LaunchedEffect(Unit) { viewModel.clearForgotPasswordState() }
+
+    // ✅ Khi gửi mail thành công -> mở màn OTP
+    LaunchedEffect(ui) {
+        if (success != null) {
+            onOpenCodeScreen(email.trim())
+            viewModel.clearForgotPasswordState()
+        }
+    }
 
     fun validate(): Boolean {
         emailErr = when {
@@ -166,19 +174,9 @@ fun ForgotPasswordScreen(
                         Text("Gửi mã", color = Color.White, fontSize = 16.sp)
                     }
                 }
-                if (!successMessage.isNullOrBlank()) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = successMessage,
-                        color = Color(0xFF16A34A),
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp)
-                    )
-                }
+
                 if (!errorMessage.isNullOrBlank()) {
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         text = errorMessage,
                         color = MaterialTheme.colorScheme.error,
@@ -188,24 +186,8 @@ fun ForgotPasswordScreen(
                             .padding(horizontal = 4.dp)
                     )
                 }
+
                 Spacer(Modifier.height(18.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Đã có mã?  ",
-                        fontSize = 13.sp,
-                        color = Color(0xFF70757A),
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "Đặt lại mật khẩu",
-                        fontSize = 13.sp,
-                        color = Color(0xFF1677FF),
-                        modifier = Modifier.clickable { onOpenResetPassword?.invoke() }
-                    )
-                }
-                Spacer(Modifier.height(8.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {

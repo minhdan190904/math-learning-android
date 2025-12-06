@@ -3,6 +3,8 @@ package com.trilogy.mathlearning.utils
 import com.firebase.ui.auth.data.model.User
 import com.trilogy.mathlearning.domain.model.UserDto
 import com.trilogy.mathlearning.domain.model.UserResDto
+import org.json.JSONArray
+import org.json.JSONObject
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -19,23 +21,46 @@ var myUser: UserResDto?
     }
 
 
+
 suspend fun <T> handleNetworkCall(
     call: suspend () -> T,
     customErrorMessages: Map<Int, String> = emptyMap()
 ): NetworkResource<T> {
     return try {
-        val response = call()
-        NetworkResource.Success(response)
-    } catch (ex: HttpException) {
-        val defaultMessages = mapOf(
-            404 to "Not found",
-            500 to "Internal Server Error. Please try again later."
+        val result = call()
+        NetworkResource.Success(result)
+    } catch (e: HttpException) {
+        val code = e.code()
+        val errorBody = e.response()?.errorBody()?.string()
+        val serverMessage = try {
+            if (!errorBody.isNullOrBlank()) {
+                val json = JSONObject(errorBody)
+                val rawMessage = json.opt("message")
+                when (rawMessage) {
+                    is String -> rawMessage
+                    is JSONArray -> rawMessage.optString(0)
+                    else -> json.optString("error", null)
+                }
+            } else null
+        } catch (_: Exception) {
+            null
+        }
+
+        val message = customErrorMessages[code]
+            ?: serverMessage
+            ?: "Đã xảy ra lỗi ($code). Vui lòng thử lại sau."
+
+        NetworkResource.Error(
+            message = message,
+            responseCode = code
         )
-        val errorMessage = customErrorMessages[ex.code()] ?: defaultMessages[ex.code()] ?: "Server error: ${ex.message()}"
-        NetworkResource.Error(message = errorMessage, responseCode = ex.code())
-    } catch (ex: IOException) {
-        NetworkResource.NetworkException("Network error. Please check your connection.")
-    } catch (ex: Exception) {
-        NetworkResource.Error(ex.message ?: "Unexpected error")
+    } catch (e: IOException) {
+        NetworkResource.NetworkException(
+            message = "Không thể kết nối tới máy chủ. Vui lòng kiểm tra kết nối mạng."
+        )
+    } catch (e: Exception) {
+        NetworkResource.Error(
+            message = "Đã xảy ra lỗi không xác định. Vui lòng thử lại sau."
+        )
     }
 }
