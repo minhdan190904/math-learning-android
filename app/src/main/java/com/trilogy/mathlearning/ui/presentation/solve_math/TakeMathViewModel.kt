@@ -113,12 +113,13 @@ class TakeMathViewModel @Inject constructor(
         val imageUrl = uploadRes.data
         try {
             when (val qRes = communityRepository.createQuestion(
-                content = null,
+                content = baiToan.contentMathProblem,
                 imageUrl = imageUrl
             )) {
                 is NetworkResource.Success -> {
                     val question = qRes.data
                     val jsonContent = Gson().toJson(baiToan)
+                    Log.i("TakeMathViewModel", "post AI answer: $jsonContent")
                     communityRepository.createAnswer(
                         questionId = question.id,
                         content = jsonContent,

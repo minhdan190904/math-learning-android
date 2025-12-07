@@ -15,7 +15,8 @@ import com.trilogy.mathlearning.utils.UiState
 data class BaiToan(
     val steps: List<String>,
     val result: String,
-    val category: String
+    val category: String,
+    val contentMathProblem: String
 )
 
 
@@ -28,7 +29,8 @@ object GenerateSolutionSteps {
                 mapOf(
                     "steps" to Schema.array(Schema.string()),
                     "result" to Schema.string(),
-                    "category" to Schema.string()
+                    "category" to Schema.string(),
+                    "contentMathProblem" to Schema.string()
                 )
             )
 

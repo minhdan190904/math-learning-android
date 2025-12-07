@@ -49,6 +49,7 @@ import com.trilogy.mathlearning.domain.model.QuestionResDto
 import com.trilogy.mathlearning.ui.presentation.community.CommunityViewModel
 import com.trilogy.mathlearning.ui.presentation.navigation.Screen
 import com.trilogy.mathlearning.utils.UiState
+import com.trilogy.mathlearning.utils.myUser
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -130,7 +131,7 @@ fun SolveMathScreen(
                 val allQuestions = s.data
                 val aiQuestions = allQuestions
                     .mapNotNull { q ->
-                        val aiAnswer = q.answers.firstOrNull { it.isAI }
+                        val aiAnswer = q.answers.firstOrNull { it.isAI && it.authorEmail == myUser!!.email }
                         if (aiAnswer != null) AiHistoryItem(question = q, aiAnswer = aiAnswer) else null
                     }
 

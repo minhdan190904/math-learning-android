@@ -220,8 +220,14 @@ private fun PracticeHistoryItem(
 
                 Spacer(Modifier.height(8.dp))
 
+                val calculatedScore = if (practice.totalAnswers > 0) {
+                    (practice.correctAnswers.toFloat() / practice.totalAnswers) * 10
+                } else {
+                    0f
+                }
+
                 Text(
-                    text = "Điểm: ${practice.score}",
+                    text = "Điểm: ${"%.1f".format(calculatedScore)}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
