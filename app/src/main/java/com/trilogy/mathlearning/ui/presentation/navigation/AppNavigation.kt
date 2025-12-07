@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.trilogy.mathlearning.ui.presentation.auth.ActivateScreen
+import com.trilogy.mathlearning.ui.presentation.auth.AuthViewModel
 import com.trilogy.mathlearning.ui.presentation.auth.ForgotCodeScreen
 import com.trilogy.mathlearning.ui.presentation.auth.ForgotPasswordScreen
 import com.trilogy.mathlearning.ui.presentation.auth.LoginScreen
@@ -31,6 +32,8 @@ import com.trilogy.mathlearning.ui.presentation.splash.WelcomeScreen
 @Composable
 fun AppNavigation(startDestination: String) {
     val navController = rememberNavController()
+
+    val authViewModel: AuthViewModel = hiltViewModel()
 
     NavHost(
         navController = navController,
@@ -227,8 +230,8 @@ fun AppNavigation(startDestination: String) {
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
         ) {
             RegisterScreen(
-                onGoActivate = {
-                    navController.navigate(Screen.Activate.route + "/$it")
+                onGoActivate = { email, name, password ->
+                    navController.navigate(Screen.Activate.route + "/$email/$name/$password")
                 },
                 onSignInClick = {
                     navController.navigate(Screen.Login.route) {
@@ -239,13 +242,15 @@ fun AppNavigation(startDestination: String) {
         }
 
         composable(
-            route = Screen.Activate.route + "/{email}",
+            route = Screen.Activate.route + "/{email}/{name}/{password}",
             enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn() },
             exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) + fadeOut() },
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }
         ) {
             val email = it.arguments?.getString("email")
+            val password = it.arguments?.getString("password")
+            val name = it.arguments?.getString("name")
             ActivateScreen(
                 email = email ?: "",
                 onBack = {
@@ -255,6 +260,9 @@ fun AppNavigation(startDestination: String) {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Activate.route + "/{email}") { inclusive = true }
                     }
+                },
+                onResendClick = {
+                    authViewModel.register(email!!, password!!, name!!)
                 }
             )
         }

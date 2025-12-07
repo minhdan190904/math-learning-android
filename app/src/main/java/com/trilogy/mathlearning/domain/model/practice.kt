@@ -62,7 +62,8 @@ data class ExerciseResDto(
     val difficulty: String,
     val choices: List<String>,
     val result: Int,
-    val solution: String
+    val solution: String,
+    val userAnswer: Int? = null // added de
 )
 
 @Serializable

@@ -195,11 +195,6 @@ fun PracticeResultScreen(
     }
 }
 
-private fun formatScore(score: Int): String {
-    val value = score.toDouble() / 10.0
-    return String.format(Locale.getDefault(), "%.1f", value)
-}
-
 @Composable
 private fun ScoreDonutBlue(percent: Float, scoreText: String, subText: String) {
     Box(

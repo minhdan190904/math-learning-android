@@ -4,15 +4,27 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,10 +32,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -73,10 +89,16 @@ fun CheckResultScreen(
         bottomBar = {
             val list = (exState as? UiState.Success)?.data.orEmpty()
             if (list.isNotEmpty()) {
+                // Dựa vào userAnswer từ backend để xác định câu đã trả lời
+                val answeredIds = list
+                    .filter { it.userAnswer != null }
+                    .map { it.id }
+                    .toSet()
+
                 NumberBarReview(
                     total = list.size,
                     current = index,
-                    answeredIds = vm.selectedAnswers.keys.toSet(),
+                    answeredIds = answeredIds,
                     ids = list.map { it.id },
                     onJump = { index = it }
                 )
@@ -86,20 +108,32 @@ fun CheckResultScreen(
     ) { inner ->
         when (val s = exState) {
             UiState.Loading, UiState.Empty -> Box(
-                Modifier.fillMaxSize().padding(inner),
+                Modifier
+                    .fillMaxSize()
+                    .padding(inner),
                 contentAlignment = Alignment.Center
-            ) { CircularProgressIndicator() }
+            ) {
+                CircularProgressIndicator()
+            }
+
             is UiState.Failure -> Box(
-                Modifier.fillMaxSize().padding(inner),
+                Modifier
+                    .fillMaxSize()
+                    .padding(inner),
                 contentAlignment = Alignment.Center
-            ) { Text(s.error ?: "Lỗi tải bài") }
+            ) {
+                Text(s.error ?: "Lỗi tải bài")
+            }
+
             is UiState.Success -> {
                 val list = s.data
                 val ex = list.getOrNull(index) ?: return@Scaffold
+
+                // pickedIndex lấy từ userAnswer backend trả về
                 ReviewQuestionBlock(
                     index = index + 1,
                     ex = ex,
-                    pickedIndex = vm.selectedAnswers[ex.id],
+                    pickedIndex = ex.userAnswer,
                     modifier = Modifier
                         .padding(inner)
                         .fillMaxSize()
@@ -120,7 +154,9 @@ fun CheckResultScreen(
                 }) { Text("Thoát") }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { showExit = false }) { Text("Hủy") }
+                androidx.compose.material3.TextButton(onClick = { showExit = false }) {
+                    Text("Hủy")
+                }
             }
         )
     }
@@ -130,7 +166,7 @@ fun CheckResultScreen(
 private fun ReviewQuestionBlock(
     index: Int,
     ex: ExerciseResDto,
-    pickedIndex: Int?,
+    pickedIndex: Int?,          // <- giờ đã là userAnswer
     modifier: Modifier = Modifier
 ) {
     val correctIndex = ex.result
@@ -144,24 +180,33 @@ private fun ReviewQuestionBlock(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Câu $index", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text("|  #${ex.id}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                "Câu $index",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text("#${ex.id}", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         MathInlineSentence(raw = ex.problem)
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             ex.choices.forEachIndexed { cidx, text ->
-                val isPicked = pickedIndex == cidx
-                val isCorrect = correctIndex == cidx
+                val isPicked = pickedIndex == cidx            // user chọn phương án này
+                val isCorrect = correctIndex == cidx          // đây là đáp án đúng
                 val shape = examShapes().large
+
                 val borderColor =
                     when {
-                        isCorrect -> Color(0xFF2DBE60)
-                        isPicked && !isCorrect -> Color(0xFFE45858)
+                        isCorrect -> Color(0xFF2DBE60)        // Đáp án đúng: xanh
+                        isPicked && !isCorrect -> Color(0xFFE45858) // User chọn sai: đỏ
                         else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
                     }
-                val label = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ").getOrNull(cidx)?.toString() ?: (cidx + 1).toString()
+
+                val label = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+                    .getOrNull(cidx)
+                    ?.toString()
+                    ?: (cidx + 1).toString()
 
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Surface(
@@ -169,7 +214,10 @@ private fun ReviewQuestionBlock(
                         shape = shape,
                         tonalElevation = 0.dp,
                         shadowElevation = 0.dp,
-                        border = androidx.compose.foundation.BorderStroke(if (isPicked || isCorrect) 2.dp else 1.dp, borderColor),
+                        border = androidx.compose.foundation.BorderStroke(
+                            if (isPicked || isCorrect) 2.dp else 1.dp,
+                            borderColor
+                        ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -182,14 +230,18 @@ private fun ReviewQuestionBlock(
                                     .clip(examShapes().small)
                                     .background(
                                         when {
-                                            isCorrect -> Color(0xFF2DBE60)
-                                            isPicked && !isCorrect -> Color(0xFFE45858)
+                                            isCorrect -> Color(0xFF2DBE60)          // ô label xanh nếu là đáp án đúng
+                                            isPicked && !isCorrect -> Color(0xFFE45858) // ô label đỏ nếu user chọn sai
                                             else -> ChoiceGray
                                         }
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(label, color = Color.White, fontWeight = FontWeight.SemiBold)
+                                Text(
+                                    label,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
                             Spacer(Modifier.width(12.dp))
                             MathInlineSentence(raw = text, modifier = Modifier.weight(1f))
@@ -242,7 +294,10 @@ private fun NumberBarReview(
                     .clickable { onJump(i) },
                 contentAlignment = Alignment.Center
             ) {
-                Text("${i + 1}", color = if (selected) Navy else MaterialTheme.colorScheme.onSurface)
+                Text(
+                    "${i + 1}",
+                    color = if (selected) Navy else MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }

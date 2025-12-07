@@ -20,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -50,7 +51,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trilogy.mathlearning.R
-import com.trilogy.mathlearning.domain.model.UserDto
 import com.trilogy.mathlearning.utils.UiState
 import kotlinx.coroutines.delay
 
@@ -66,9 +66,15 @@ fun ActivateScreen(
     val primaryBlue = Color(0xFF1677FF)
     val cardShape = RoundedCornerShape(22.dp)
 
-    LaunchedEffect(ui) {
-        (ui as? UiState.Success<*>)?.data?.let {
-            if (it is UserDto) onActivated()
+    val isLoading = ui is UiState.Loading
+    val errorMessage = (ui as? UiState.Failure)?.error
+
+    var isSubmitted by remember { mutableStateOf(false) }
+
+    LaunchedEffect(ui, isSubmitted) {
+        if (isSubmitted && ui is UiState.Success<*>) {
+            isSubmitted = false
+            onActivated()
         }
     }
 
@@ -88,8 +94,12 @@ fun ActivateScreen(
         ) {
             ActivateContent(
                 email = email,
-                isLoading = ui is UiState.Loading,
-                onSubmit = { code -> viewModel.activate(email, code) },
+                isLoading = isLoading,
+                errorMessage = errorMessage,
+                onSubmit = { code ->
+                    isSubmitted = true
+                    viewModel.activate(email, code)
+                },
                 onResendClick = onResendClick
             )
         }
@@ -100,6 +110,7 @@ fun ActivateScreen(
 private fun ActivateContent(
     email: String,
     isLoading: Boolean,
+    errorMessage: String?,
     onSubmit: (String) -> Unit,
     onResendClick: (() -> Unit)?
 ) {
@@ -119,8 +130,8 @@ private fun ActivateContent(
         }
     }
 
-    LaunchedEffect(Unit) {
-        while (seconds > 0) {
+    LaunchedEffect(seconds) {
+        if (seconds > 0) {
             delay(1000)
             seconds -= 1
         }
@@ -231,26 +242,41 @@ private fun ActivateContent(
             }
         }
 
+        if (!errorMessage.isNullOrBlank()) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
+            )
+        }
+
         Spacer(Modifier.height(14.dp))
-        Text(
-            text = "Không nhận được mã?",
-            color = Color(0xFF70757A),
-            fontSize = 13.sp
-        )
-        Text(
-            text = "Gửi lại mã",
-            color = primaryBlue,
-            fontSize = 13.sp,
-            modifier = Modifier.clickable {
-                if (seconds == 0) {
-                    onResendClick?.invoke()
-                    seconds = 59
-                    focusRequester.requestFocus()
-                    keyboardController?.show()
-                }
-            },
-            textAlign = TextAlign.Center
-        )
+        if (seconds == 0) {
+            Text(
+                text = "Không nhận được mã?",
+                color = Color(0xFF70757A),
+                fontSize = 13.sp
+            )
+            Text(
+                text = "Gửi lại mã",
+                color = primaryBlue,
+                fontSize = 13.sp,
+                modifier = Modifier.clickable {
+                    if (!isLoading) {
+                        onResendClick?.invoke()
+                        code = ""
+                        seconds = 59
+                        focusRequester.requestFocus()
+                        keyboardController?.show()
+                    }
+                },
+                textAlign = TextAlign.Center
+            )
+        }
         Spacer(Modifier.height(8.dp))
     }
 }

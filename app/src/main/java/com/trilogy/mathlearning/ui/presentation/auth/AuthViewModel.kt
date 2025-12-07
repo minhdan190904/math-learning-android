@@ -34,8 +34,8 @@ class AuthViewModel @Inject constructor(
     private val _userInfo = MutableStateFlow<UserResDto?>(null)
     val userInfo: StateFlow<UserResDto?> = _userInfo
 
-    private val _registerInfo = MutableStateFlow<LoginDto?>(null)
-    val registerInfo: StateFlow<LoginDto?> = _registerInfo
+    private val _registerInfo = MutableStateFlow<RegisterDto?>(null)
+    val registerInfo: StateFlow<RegisterDto?> = _registerInfo
 
     private val _logoutState = MutableStateFlow<UiState<Unit>>(UiState.Empty)
     val logoutState: StateFlow<UiState<Unit>> = _logoutState
@@ -75,7 +75,7 @@ class AuthViewModel @Inject constructor(
             _authState.value = UiState.Loading
             when (val res = authRepository.registerUser(RegisterDto(name = name, email = email, password = password))) {
                 is NetworkResource.Success -> {
-                    _registerInfo.value = LoginDto(email = email, password = password)
+                    _registerInfo.value = RegisterDto(name = name, email = email, password = password)
                     _authState.value = UiState.Success(res.data)
                 }
                 is NetworkResource.NetworkException -> {

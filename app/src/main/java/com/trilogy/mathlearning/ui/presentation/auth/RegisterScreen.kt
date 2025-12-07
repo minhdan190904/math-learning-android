@@ -56,7 +56,7 @@ import com.trilogy.mathlearning.utils.UiState
 
 @Composable
 fun RegisterScreen(
-    onGoActivate: (email: String) -> Unit,
+    onGoActivate: (email: String, name: String, password: String) -> Unit,
     onSignInClick: (() -> Unit)? = null,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -64,12 +64,21 @@ fun RegisterScreen(
     val primaryBlue = Color(0xFF1677FF)
     val cardShape = RoundedCornerShape(22.dp)
 
+    val isLoading = ui is UiState.Loading
+    val errorMessage = (ui as? UiState.Failure)?.error
+
+    LaunchedEffect(Unit) {
+        viewModel.clearAuthState()
+    }
+
     LaunchedEffect(ui) {
         (ui as? UiState.Success<*>)?.data?.let { data ->
             if (data is UserDto) {
                 val email = viewModel.registerInfo.value?.email ?: ""
+                val name = viewModel.registerInfo.value?.name ?: ""
+                val password = viewModel.registerInfo.value?.password ?: ""
                 viewModel.clearAuthState()
-                onGoActivate(email)
+                onGoActivate(email, name, password)
             }
         }
     }
@@ -89,7 +98,8 @@ fun RegisterScreen(
                 .fillMaxWidth()
         ) {
             RegisterContent(
-                isLoading = ui is UiState.Loading,
+                isLoading = isLoading,
+                errorMessage = errorMessage,
                 onSubmit = { name, email, pass ->
                     viewModel.register(email.trim(), pass, name.trim())
                 },
@@ -102,6 +112,7 @@ fun RegisterScreen(
 @Composable
 private fun RegisterContent(
     isLoading: Boolean,
+    errorMessage: String?,
     onSubmit: (String, String, String) -> Unit,
     onSignInClick: (() -> Unit)?
 ) {
@@ -121,7 +132,11 @@ private fun RegisterContent(
             !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Email không hợp lệ"
             else -> null
         }
-        passErr = if (pass.length < 6) "Mật khẩu phải có ít nhất 6 ký tự" else null
+        passErr = when {
+            pass.length < 8 -> "Mật khẩu phải có ít nhất 8 ký tự"
+            !pass.any { it.isUpperCase() } -> "Mật khẩu cần có ít nhất 1 chữ cái in hoa"
+            else -> null
+        }
         return nameErr == null && emailErr == null && passErr == null
     }
 
@@ -217,6 +232,18 @@ private fun RegisterContent(
             )
         )
         ErrorHint(passErr)
+
+        if (!errorMessage.isNullOrBlank()) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
+            )
+        }
 
         Spacer(Modifier.height(16.dp))
         Button(

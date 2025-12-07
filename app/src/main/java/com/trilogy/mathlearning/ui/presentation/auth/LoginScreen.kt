@@ -124,7 +124,11 @@ fun ContentBlock(
             !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Email không hợp lệ"
             else -> null
         }
-        passErr = if (pass.length < 6) "Mật khẩu phải có ít nhất 6 ký tự" else null
+        passErr = when {
+            pass.length < 8 -> "Mật khẩu phải có ít nhất 8 ký tự"
+            !pass.any { it.isUpperCase() } -> "Mật khẩu cần có ít nhất 1 chữ cái in hoa"
+            else -> null
+        }
         return emailErr == null && passErr == null
     }
 

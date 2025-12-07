@@ -30,7 +30,8 @@ data class RegisterDto(
 @Serializable
 data class LoginDto(
     val email: String,
-    val password: String
+    val password: String,
+    val name: String? = null,
 )
 
 @Serializable

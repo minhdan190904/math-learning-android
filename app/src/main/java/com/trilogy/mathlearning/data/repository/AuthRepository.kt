@@ -32,8 +32,7 @@ class AuthRepository @Inject constructor(
     suspend fun registerUser(registerDto: RegisterDto): NetworkResource<UserDto> {
         return handleNetworkCall(
             call = { authApi.register(registerDto) },
-            customErrorMessages = commonErrors + mapOf(
-                409 to "Email đã tồn tại"
+            customErrorMessages = mapOf(
             )
         )
     }
@@ -41,49 +40,35 @@ class AuthRepository @Inject constructor(
     suspend fun activateUser(activeUserDto: ActiveUserDto): NetworkResource<UserDto> {
         return handleNetworkCall(
             call = { authApi.activate(activeUserDto) },
-            customErrorMessages = commonErrors + mapOf(
-                400 to "Mã kích hoạt không hợp lệ hoặc đã hết hạn",
-                404 to "Không tìm thấy tài khoản cần kích hoạt"
-            )
+            customErrorMessages = mapOf()
         )
     }
 
     suspend fun login(loginDto: LoginDto): NetworkResource<LoginResDto> {
         return handleNetworkCall(
             call = { authApi.login(loginDto) },
-            customErrorMessages = commonErrors + mapOf(
-                403 to "Tài khoản chưa kích hoạt. Vui lòng kiểm tra email.",
-                423 to "Tài khoản đang bị khoá tạm thời",
-                400 to "Tài khoản hoặc mật khẩu không đúng"
-            )
+            customErrorMessages = mapOf()
         )
     }
 
     suspend fun forgotPassword(dto: ForgotPasswordDto): NetworkResource<ResDto> {
         return handleNetworkCall(
             call = { authApi.forgotPassword(dto) },
-            customErrorMessages = commonErrors + mapOf(
-                404 to "Email không tồn tại trong hệ thống"
-            )
+            customErrorMessages = mapOf()
         )
     }
 
     suspend fun resetPassword(dto: ResetPasswordDto): NetworkResource<ResDto> {
         return handleNetworkCall(
             call = { authApi.resetPassword(dto) },
-            customErrorMessages = commonErrors + mapOf(
-                400 to "Mã/Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn"
-            )
+            customErrorMessages = mapOf()
         )
     }
 
     suspend fun refreshToken(dto: RefreshTokenDto): NetworkResource<LoginResDto> {
         return handleNetworkCall(
             call = { authApi.refreshToken(dto) },
-            customErrorMessages = commonErrors + mapOf(
-                401 to "Refresh token không hợp lệ",
-                403 to "Refresh token đã hết hạn hoặc bị thu hồi"
-            )
+            customErrorMessages = mapOf()
         )
     }
 }
